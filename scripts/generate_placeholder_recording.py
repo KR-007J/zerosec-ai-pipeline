@@ -5,6 +5,7 @@ Displays colored terminal commands, prompt injection payloads, and NeMo guardrai
 """
 
 import os
+import sys
 import subprocess
 
 def generate_test_recording(output_path, duration_sec=25):
@@ -37,4 +38,7 @@ def generate_test_recording(output_path, duration_sec=25):
     return output_path
 
 if __name__ == "__main__":
-    generate_test_recording("/home/krish/.gemini/antigravity/scratch/sec-ai-pipeline/build/prevent-prompt-injection-langchain-nemo/input.mp4", duration_sec=25)
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    slug = sys.argv[1] if len(sys.argv) > 1 else "prevent-prompt-injection-langchain-nemo"
+    target = os.path.join(root, "build", slug, "input.mp4")
+    generate_test_recording(target, duration_sec=25)
