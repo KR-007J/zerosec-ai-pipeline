@@ -2,18 +2,41 @@
 """
 ZeroSec AI - Kaggle GPU Video Assembly Worker
 Runs on Kaggle Free T4/P100 GPU (30 hours/week free quota).
-1. Uses faster-whisper on GPU to transcribe audio with word timestamps in <15s.
-2. Formats ASS subtitles according to ZeroSec brand styling.
-3. Assembles 1080p master video with audio ducking and burned subtitles.
-4. Exports 3 vertical 1080x1920 Shorts from key retention beats.
-All outputs are saved to /kaggle/working/ for automatic retrieval via Kaggle API.
+1. Bootstraps faster-whisper and ensures FFmpeg binary exists.
+2. Recursively searches /kaggle/input for input video, voiceover, and ambient music.
+3. Transcribes audio on CUDA GPU in <15s, emitting word timestamps & styled ASS subtitles.
+4. Assembles 1080p master video with audio ducking and burned subtitles.
+5. Exports 3 vertical 1080x1920 Shorts from key retention beats.
+Outputs are saved to /kaggle/working/ for automatic retrieval via Kaggle API.
 """
 
 import os
 import sys
 import json
 import glob
+import shutil
 import subprocess
+
+# --- 1. BOOTSTRAP DEPENDENCIES ON KAGGLE CONTAINER ---
+print("=== ZeroSec AI Kaggle GPU Worker Bootstrapping ===")
+
+# Bootstrap faster-whisper if not installed
+try:
+    import faster_whisper
+except ImportError:
+    print("[BOOTSTRAP] Installing faster-whisper on Kaggle GPU instance...")
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "faster-whisper"], check=True)
+    import faster_whisper
+
+# Ensure FFmpeg is available
+FFMPEG_BIN = shutil.which("ffmpeg")
+if not FFMPEG_BIN:
+    print("[BOOTSTRAP] FFmpeg not found in path. Installing imageio-ffmpeg static binary...")
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "imageio-ffmpeg"], check=True)
+    import imageio_ffmpeg
+    FFMPEG_BIN = imageio_ffmpeg.get_ffmpeg_exe()
+
+print(f"[BOOTSTRAP] Ready! Python: {sys.version.split()[0]} | FFmpeg: {FFMPEG_BIN}")
 
 def format_ass_time(seconds):
     h = int(seconds // 3600)
@@ -23,46 +46,30 @@ def format_ass_time(seconds):
     return f"{h}:{m:02d}:{s:02d}.{cs:02d}"
 
 def transcribe_audio_whisper(audio_path, output_json, output_ass):
-    """
-    Runs faster-whisper on CUDA GPU. Generates word-level timestamps & ASS subtitles.
-    """
     print(f"[KAGGLE GPU] Loading faster-whisper on CUDA for: {audio_path}...")
+    from faster_whisper import WhisperModel
     try:
-        from faster_whisper import WhisperModel
-        # Use GPU with float16 on Kaggle T4
         model = WhisperModel("small.en", device="cuda", compute_type="float16")
     except Exception as e:
-        print(f"[WARN] CUDA Whisper unavailable ({e}), attempting CPU fallback...", file=sys.stderr)
-        from faster_whisper import WhisperModel
+        print(f"[WARN] CUDA Whisper initialization fallback ({e}), using CPU...", file=sys.stderr)
         model = WhisperModel("base.en", device="cpu", compute_type="int8")
 
     segments, info = model.transcribe(audio_path, word_timestamps=True)
 
     words_data = []
     dialogue_events = []
-    
+
     for segment in segments:
         text = segment.text.strip()
-        start = segment.start
-        end = segment.end
-        dialogue_events.append({
-            "start": start,
-            "end": end,
-            "text": text
-        })
+        dialogue_events.append({"start": segment.start, "end": segment.end, "text": text})
         if segment.words:
             for w in segment.words:
-                words_data.append({
-                    "word": w.word,
-                    "start": w.start,
-                    "end": w.end,
-                    "prob": w.probability
-                })
+                words_data.append({"word": w.word, "start": w.start, "end": w.end, "prob": w.probability})
 
     with open(output_json, "w", encoding="utf-8") as f:
         json.dump({"info": {"language": info.language, "duration": info.duration}, "words": words_data, "segments": dialogue_events}, f, indent=2)
 
-    # Build ASS subtitles
+    # Build ASS subtitles with ZeroSec styling
     ass_header = """[Script Info]
 Title: ZeroSec AI Subtitles
 ScriptType: v4.00+
@@ -80,29 +87,27 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     lines = []
     for d in dialogue_events:
-        start_str = format_ass_time(d["start"])
-        end_str = format_ass_time(d["end"])
+        s_time = format_ass_time(d["start"])
+        e_time = format_ass_time(d["end"])
         t = d["text"].replace("\n", "\\N")
-        lines.append(f"Dialogue: 0,{start_str},{end_str},Default,,0,0,0,,{t}")
+        lines.append(f"Dialogue: 0,{s_time},{e_time},Default,,0,0,0,,{t}")
 
     with open(output_ass, "w", encoding="utf-8") as f:
         f.write(ass_header + "\n".join(lines) + "\n")
 
-    print(f"[SUCCESS] Transcribed {len(dialogue_events)} segments -> {output_ass}")
+    print(f"[SUCCESS] Transcribed {len(dialogue_events)} dialogue segments -> {output_ass}")
     return output_ass
 
 def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, working_dir):
-    """
-    Assembles master video and exports 3 vertical Shorts into /kaggle/working/
-    """
     master_path = os.path.join(working_dir, "master.mp4")
     shorts_dir = os.path.join(working_dir, "shorts")
     os.makedirs(shorts_dir, exist_ok=True)
 
-    print(f"[KAGGLE GPU] Rendering 1080p master video -> {master_path}")
-    
+    print(f"[KAGGLE GPU] Rendering 1080p master video via FFmpeg -> {master_path}")
+    escaped_ass = ass_path.replace(":", "\\:").replace("'", "\\'")
+
     vf = (
-        f"ass='{ass_path}',"
+        f"ass='{escaped_ass}',"
         f"drawtext=text=ZeroSec AI:x=w-160:y=40:fontsize=18:fontcolor=white,"
         f"drawbox=x=80:y=h-80:w=580:h=40:color=0x161B22@0.85:t=fill,"
         f"drawtext=text=Defensive Lab Sandbox - Blue Team Verified:x=100:y=h-68:fontsize=16:fontcolor=0x00FF9D"
@@ -115,7 +120,7 @@ def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, worki
     )
 
     cmd_master = [
-        "ffmpeg", "-y",
+        FFMPEG_BIN, "-y",
         "-i", input_video,
         "-i", input_audio,
         "-i", bg_music,
@@ -150,7 +155,7 @@ def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, worki
             f"drawtext=text='ZeroSec AI #Shorts':x=60:y=1750:fontsize=28:fontcolor=0x8B949E"
         )
         cmd_short = [
-            "ffmpeg", "-y",
+            FFMPEG_BIN, "-y",
             "-ss", str(start_sec),
             "-i", master_path,
             "-t", str(dur_sec),
@@ -165,26 +170,29 @@ def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, worki
         print(f"[SUCCESS] Short rendered -> {out_short}")
 
 def main():
-    print("=== ZeroSec AI Kaggle GPU Assembly Worker Starting ===")
-    
-    # Locate inputs
+    print("=== ZeroSec AI Kaggle GPU Worker Execution ===")
     search_dirs = ["/kaggle/input", "/kaggle/working", "."]
     videos = []
     audios = []
     musics = []
 
     for d in search_dirs:
-        videos.extend(glob.glob(os.path.join(d, "**", "*input*.mp4"), recursive=True))
-        audios.extend(glob.glob(os.path.join(d, "**", "*vo_master*.wav"), recursive=True))
-        musics.extend(glob.glob(os.path.join(d, "**", "*background*.wav"), recursive=True))
+        if os.path.exists(d):
+            videos.extend(glob.glob(os.path.join(d, "**", "*input*.mp4"), recursive=True))
+            audios.extend(glob.glob(os.path.join(d, "**", "*vo_master*.wav"), recursive=True))
+            musics.extend(glob.glob(os.path.join(d, "**", "*background*.wav"), recursive=True))
 
     if not videos or not audios:
-        print(f"[ERROR] Required inputs not found! Videos: {videos}, Audios: {audios}", file=sys.stderr)
+        print(f"[ERROR] Required inputs not found in search paths: Videos={videos}, Audios={audios}", file=sys.stderr)
         sys.exit(1)
 
     input_video = videos[0]
     input_audio = audios[0]
     bg_music = musics[0] if musics else input_audio
+
+    print(f"[INFO] Using Video Input: {input_video}")
+    print(f"[INFO] Using Audio Input: {input_audio}")
+    print(f"[INFO] Using Ambient BG:  {bg_music}")
 
     working_dir = "/kaggle/working" if os.path.exists("/kaggle") else "./build_output"
     os.makedirs(working_dir, exist_ok=True)
@@ -192,13 +200,13 @@ def main():
     output_json = os.path.join(working_dir, "transcription.json")
     output_ass = os.path.join(working_dir, "subtitles.ass")
 
-    # Step 1: Transcribe with Faster-Whisper
+    # Step 1: Faster-Whisper Transcription
     transcribe_audio_whisper(input_audio, output_json, output_ass)
 
-    # Step 2: Assemble Master & Shorts via FFmpeg
+    # Step 2: FFmpeg GPU Assembly
     render_master_and_shorts(input_video, input_audio, bg_music, output_ass, working_dir)
 
-    print("=== ZeroSec AI Kaggle GPU Worker Finished Successfully ===")
+    print("=== ZeroSec AI Kaggle GPU Worker Completed Successfully ===")
 
 if __name__ == "__main__":
     main()
