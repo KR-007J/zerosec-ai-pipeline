@@ -33,7 +33,7 @@ https://github.com/YOUR_GITHUB_ORG/zerosec-demos/tree/main/prevent-prompt-inject
 
 🛡️ RECOMMENDED DEVELOPER & SECURITY TOOLS:
 • DigitalOcean / Cloud VPS: https://m.do.co/c/YOUR_AFFILIATE_ID
-  (Get 00 free cloud credits to spin up isolated security sandboxes)
+  (Get $200 free cloud credits to spin up isolated security sandboxes)
 • Bright Data / Residential Proxies: https://brightdata.com/?ref=YOUR_AFFILIATE_ID
   (Enterprise proxies for threat intelligence and security reconnaissance)
 • Proton / Mullvad VPN: https://protonvpn.com/?ref=YOUR_AFFILIATE_ID
