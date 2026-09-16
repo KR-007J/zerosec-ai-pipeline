@@ -1,0 +1,32 @@
+name: "ZeroSec AI - Weekly Research Agent"
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # Every Monday 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  update-queue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Research Agent
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          python3 research/collect.py
+
+      - name: Commit Updated Queue
+        run: |
+          git config --global user.name "ZeroSec Bot"
+          git config --global user.email "bot@zerosec.ai"
+          git add research/queue.md
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore(research): update weekly topic queue [skip ci]"
+          git push

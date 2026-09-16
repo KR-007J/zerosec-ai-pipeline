@@ -1,0 +1,29 @@
+# Python virtual environment
+.venv/
+__pycache__/
+*.py[cod]
+
+# OS & IDE artifacts
+.DS_Store
+.idea/
+.vscode/
+
+# Build artifacts & media
+build/*/input.mp4
+build/*/master.mp4
+build/*/master_subtitled.mp4
+build/*/shorts/*.mp4
+build/*/*.wav
+package_output/
+*.tar.gz
+
+# Retain templates and approved markers
+!build/**/script.md
+!build/**/shotlist.md
+!build/**/metadata.txt
+!build/**/APPROVED
+!build/**/thumb_*.png
+
+# Kaggle credentials
+.kaggle/
+kaggle.json

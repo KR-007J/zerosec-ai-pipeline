@@ -1,0 +1,21 @@
+An L L M agent with direct tool execution is a security vulnerability waiting to happen. If you connect LangChain to a shell or database without a deterministic guardrail, an attacker can bypass your system prompt in seconds. Today, we are setting up NeMo Guardrails to stop jailbreaks and prompt injection at the runtime layer.
+
+Prompt injection isn't a bug you can fix with a longer system prompt. Attackers use payload splitting, delimiter injection, and role-playing attacks to override developer instructions. . Traditional reg ex and keyword blocklists fail because natural language is infinitely combinatorial. NeMo Guardrails, developed by NVIDIA, solves this by intercepting user inputs before they reach the model  checking responses against programmable Colang execution flows. .
+
+Setting Up the Isolated Sandbox & Installing Dependencies
+
+We begin by spinning up an isolated virtual environment. Always test L L M tools inside an unprivileged sandbox or a disposable cloud VPS so test scripts cannot touch sensitive environment variables.
+
+Defining Colang Security Rails for Input and Output Guardrails
+
+In NeMo Guardrails, policies are declared in Colang. We define an input rail that detects jailbreak attempts . routes the conversation to a safe refusal state before any LangChain tool or downstream A P I receives the malicious token payload.
+
+Live Test: Injecting Exploit Payloads vs Guardrail Defense
+
+When we execute our test harness against the naked LangChain agent, the injection succeeds. But when routed through the NeMo LLMRails wrapper, the guardrail triggers an instant block with 0 tokens leaked to the underlying model.
+
+While NeMo Guardrails significantly hardens your application. it adds between 200 to 450 milliseconds of latency per request depending on whether you use self-hosted embeddings or A P I-based classification models. . Additionally, over-restrictive semantic rules can introduce false positive refusals on benign developer questions.
+
+For any production agent that executes SQL queries, file I/O, or web requests, relying solely on prompt engineering is irresponsible engineering. NeMo Guardrails provides a defensible, programmable boundary that belongs in your production security stack.
+
+All configuration files and test scripts are linked in the GitHub repository in the description. If you are deploying this to the cloud, use the isolated VPS link below for $200 in free credits to test without risking your infrastructure. Let me know in the comments: what guardrails are you currently running in production?

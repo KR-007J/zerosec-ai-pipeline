@@ -1,0 +1,69 @@
+{
+  "mandatory_disclosures": {
+    "on_screen_toast": "Includes affiliate & partner links. Full details in description.",
+    "description_notice": "DISCLOSURE: Some links below are affiliate links. If you make a purchase or start a trial through them, I may earn a commission at zero additional cost to you. I only recommend tools independently tested in my security research environment.",
+    "pinned_comment_notice": "Transparency note: The tool links shared above contain affiliate referral links."
+  },
+  "programs": [
+    {
+      "id": "cloud_infra",
+      "name": "DigitalOcean / Cloud VPS",
+      "category": "Cloud Infrastructure",
+      "url": "https://m.do.co/c/YOUR_AFFILIATE_ID",
+      "offer_text": "Get 00 free cloud credits to spin up isolated security sandboxes",
+      "keywords": [
+        "cloud",
+        "vps",
+        "server",
+        "docker",
+        "sandbox",
+        "deploy"
+      ]
+    },
+    {
+      "id": "proxy_scraping",
+      "name": "Bright Data / Residential Proxies",
+      "category": "Network & Intelligence",
+      "url": "https://brightdata.com/?ref=YOUR_AFFILIATE_ID",
+      "offer_text": "Enterprise proxies for threat intelligence and security reconnaissance",
+      "keywords": [
+        "proxy",
+        "ip",
+        "threat intel",
+        "recon",
+        "osint",
+        "scraper"
+      ]
+    },
+    {
+      "id": "vpn_privacy",
+      "name": "Proton / Mullvad VPN",
+      "category": "Network Privacy",
+      "url": "https://protonvpn.com/?ref=YOUR_AFFILIATE_ID",
+      "offer_text": "Open-source, audited VPN for blue team network isolation",
+      "keywords": [
+        "vpn",
+        "privacy",
+        "traffic",
+        "dns",
+        "tunnel",
+        "wireshark"
+      ]
+    },
+    {
+      "id": "secrets_manager",
+      "name": "1Password / Bitwarden",
+      "category": "Identity & Secrets Management",
+      "url": "https://1password.com/?ref=YOUR_AFFILIATE_ID",
+      "offer_text": "Secure developer vault for CLI SSH keys and API secrets",
+      "keywords": [
+        "secrets",
+        "api key",
+        "password",
+        "ssh",
+        "vault",
+        "credentials"
+      ]
+    }
+  ]
+}

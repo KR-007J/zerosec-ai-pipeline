@@ -1,0 +1,38 @@
+{
+  "channel_name": "ZeroSec AI",
+  "tagline": "Defensive AI & Cloud Security Engineering",
+  "target_audience": "US/EU Professional Software & Security Engineers",
+  "colors": {
+    "background": "&H00110D&",
+    "background_hex": "#0D1117",
+    "surface_hex": "#161B22",
+    "accent_cyan": "#38BDF8",
+    "accent_green": "#00FF9D",
+    "warning_amber": "#F59E0B",
+    "text_primary": "#F0F6FC",
+    "text_muted": "#8B949E"
+  },
+  "typography": {
+    "code_font": "DejaVu Sans Mono",
+    "heading_font": "DejaVu Sans",
+    "caption_font": "DejaVu Sans"
+  },
+  "subtitles": {
+    "fontname": "DejaVu Sans",
+    "fontsize": 22,
+    "primary_color": "&H00FFFFFF&",
+    "secondary_color": "&H009DFF00&",
+    "outline_color": "&H00000000&",
+    "back_color": "&H80000000&",
+    "bold": 1,
+    "alignment": 2,
+    "margin_v": 45
+  },
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "shorts_width": 1080,
+    "shorts_height": 1920
+  }
+}

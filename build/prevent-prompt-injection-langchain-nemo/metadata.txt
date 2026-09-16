@@ -1,0 +1,53 @@
+=== YOUTUBE VIDEO METADATA PACKAGE ===
+
+TITLE (53 chars):
+LangChain Prompt Injection: Stop Jailbreaks with NeMo
+
+MADE FOR KIDS: False
+CATEGORY: Science & Technology (28)
+
+TAGS (20 tags, comma-separated):
+langchain prompt injection, nemo guardrails tutorial, llm security, prevent prompt injection, owasp llm top 10, ai agent security, langchain security, colang guardrails, nvidia nemo guardrails, blue team ai, cybersecurity for developers, secure llm deployment, prompt injection defense, llm jailbreak prevention, ai red teaming defense, python ai security, cloud security vps, langchain tutorial 2026, defensive security engineering, zerosec ai
+
+DESCRIPTION:
+In this hands-on blue team tutorial, we walk through how to defend LangChain agents from prompt injection and runtime jailbreaks using NVIDIA NeMo Guardrails and programmable Colang flow policies.
+
+Never connect an LLM directly to tools, databases, or shell execution without a deterministic interception rail. Here is the exact architectural setup and testbed.
+
+⚡ CODE REPOSITORY & DEMO HARNESS:
+https://github.com/YOUR_GITHUB_ORG/zerosec-demos/tree/main/prevent-prompt-injection-langchain-nemo
+
+⏱️ TIMESTAMPS:
+00:00 - The Threat: Hijacking LangChain in 10 Seconds
+00:30 - Threat Model: Why System Prompts Fail (OWASP LLM01)
+01:45 - Setting Up the Isolated Virtualenv Sandbox
+03:00 - Defining Colang Input & Output Guardrails
+05:00 - Live Attack Simulation: Exploit vs Guardrail Defense
+07:00 - Performance Tradeoff: Latency Benchmark Overhead
+08:00 - Production Verdict & Best Practices
+08:45 - Resources, VPS Sandboxes & Next Steps
+
+📚 VERIFIED DOCUMENTATION & SOURCES:
+• OWASP Top 10 for LLM Applications (LLM01: Prompt Injection): https://owasp.org/www-project-top-10-for-large-language-model-applications/
+• NVIDIA NeMo Guardrails Security Guidelines: https://github.com/NVIDIA/NeMo-Guardrails/blob/develop/docs/security/guidelines.md
+
+🛡️ RECOMMENDED DEVELOPER & SECURITY TOOLS:
+• DigitalOcean / Cloud VPS: https://m.do.co/c/YOUR_AFFILIATE_ID
+  (Get 00 free cloud credits to spin up isolated security sandboxes)
+• Bright Data / Residential Proxies: https://brightdata.com/?ref=YOUR_AFFILIATE_ID
+  (Enterprise proxies for threat intelligence and security reconnaissance)
+• Proton / Mullvad VPN: https://protonvpn.com/?ref=YOUR_AFFILIATE_ID
+  (Open-source, audited VPN for blue team network isolation)
+• 1Password / Bitwarden: https://1password.com/?ref=YOUR_AFFILIATE_ID
+  (Secure developer vault for CLI SSH keys and API secrets)
+
+⚖️ DISCLOSURE: Some links below are affiliate links. If you make a purchase or start a trial through them, I may earn a commission at zero additional cost to you. I only recommend tools independently tested in my security research environment.
+
+#LangChain #PromptInjection #Cybersecurity #NeMoGuardrails #LLMSecurity #DevSecOps
+
+PINNED COMMENT:
+💬 Which guardrail framework are you using in production for your LLM agents (NeMo, Llama Guard, or custom regex)? Let me know your latency requirements below!
+
+🔗 Grab the full test scripts and Colang config here: https://github.com/YOUR_GITHUB_ORG/zerosec-demos/tree/main/prevent-prompt-injection-langchain-nemo
+
+(Transparency note: The tool links shared above contain affiliate referral links.)
