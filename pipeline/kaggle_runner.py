@@ -4,10 +4,11 @@ ZeroSec AI - Kaggle GPU Dispatcher & Pipeline Bridge
 Orchestrates end-to-end Kaggle GPU processing:
 1. Configures ~/.kaggle/kaggle.json from KAGGLE_USERNAME & KAGGLE_KEY secrets.
 2. Packages input media into a dedicated Kaggle Dataset (kaggle datasets create/version).
-3. Links the dataset to kaggle/kernel-metadata.json under dataset_sources.
-4. Pushes the GPU kernel (kaggle kernels push).
-5. Polls kernel status until 'complete'.
-6. Downloads rendered master.mp4 and shorts/ into build/<slug>/.
+3. Polls dataset status until 'ready' (preventing asynchronous upload race condition).
+4. Links the dataset to kaggle/kernel-metadata.json under dataset_sources.
+5. Pushes the GPU kernel (kaggle kernels push).
+6. Polls kernel status until 'complete'.
+7. Downloads rendered master.mp4 and shorts/ into build/<slug>/.
 If credentials are absent or fail, gracefully executes runner assembly (pipeline/edit.py).
 """
 
@@ -35,9 +36,6 @@ def setup_kaggle_credentials():
     return username
 
 def stage_and_upload_dataset(username, slug, build_dir, root_dir):
-    """
-    Packages input media and pushes to a Kaggle Dataset so /kaggle/input receives them.
-    """
     staging_dir = os.path.join(build_dir, "_kaggle_dataset_staging")
     os.makedirs(staging_dir, exist_ok=True)
 
@@ -47,7 +45,6 @@ def stage_and_upload_dataset(username, slug, build_dir, root_dir):
         if os.path.isfile(p):
             os.remove(p)
 
-    # Copy input video, voiceover, and ambient track
     input_video = os.path.join(build_dir, "input.mp4")
     input_audio = os.path.join(build_dir, "vo_master.wav")
     bg_music = os.path.join(root_dir, "assets", "background_ambient.wav")
@@ -60,7 +57,6 @@ def stage_and_upload_dataset(username, slug, build_dir, root_dir):
     if os.path.exists(bg_music):
         shutil.copy(bg_music, os.path.join(staging_dir, "background_ambient.wav"))
 
-    # Generate dataset-metadata.json
     dataset_slug = f"zerosec-inputs-{slug[:12].strip('-')}"
     dataset_id = f"{username}/{dataset_slug}"
     meta = {
@@ -78,14 +74,32 @@ def stage_and_upload_dataset(username, slug, build_dir, root_dir):
     res = subprocess.run(status_cmd, capture_output=True, text=True)
 
     if res.returncode == 0:
-        print("[INFO] Dataset exists, creating new version...")
+        print("[INFO] Dataset exists, uploading new version...")
         cmd = ["kaggle", "datasets", "version", "-p", staging_dir, "-m", "update media", "--dir-mode", "zip"]
     else:
         print("[INFO] Creating new Kaggle dataset...")
         cmd = ["kaggle", "datasets", "create", "-p", staging_dir, "-u", "--dir-mode", "zip"]
 
     subprocess.run(cmd, check=True)
-    print(f"[SUCCESS] Kaggle Dataset synced: {dataset_id}")
+
+    # POLL DATASET STATUS UNTIL 'ready' (Eliminate asynchronous upload race condition)
+    print(f"[INFO] Polling dataset processing status for {dataset_id}...")
+    dataset_ready = False
+    for attempt in range(24): # Wait up to 2 minutes
+        poll_res = subprocess.run(["kaggle", "datasets", "status", dataset_id], capture_output=True, text=True)
+        status_text = poll_res.stdout.strip().lower()
+        if "ready" in status_text or "complete" in status_text:
+            print(f"[SUCCESS] Kaggle Dataset is processed and READY: {dataset_id}")
+            dataset_ready = True
+            break
+        elif "error" in status_text or "failed" in status_text:
+            raise RuntimeError(f"Kaggle dataset processing failed: {poll_res.stdout}")
+        print(f"  ... Dataset processing status: '{status_text}' (waiting 5s) ...")
+        time.sleep(5)
+
+    if not dataset_ready:
+        print("[WARN] Dataset status poll timed out; proceeding with kernel push attempt...", file=sys.stderr)
+
     return dataset_id
 
 def dispatch_kaggle_gpu_job(username, slug):
@@ -94,7 +108,7 @@ def dispatch_kaggle_gpu_job(username, slug):
     meta_path = os.path.join(kaggle_dir, "kernel-metadata.json")
     build_dir = os.path.join(root, "build", slug)
 
-    # 1. Upload input media to Kaggle Dataset
+    # 1. Upload & await dataset ready state
     dataset_id = stage_and_upload_dataset(username, slug, build_dir, root)
 
     # 2. Update kernel metadata with dataset dependency
@@ -147,7 +161,7 @@ def run_assembly_bridge(slug="prevent-prompt-injection-langchain-nemo"):
         except Exception as e:
             print(f"[WARN] Kaggle GPU job failed or was skipped ({e}). Falling back to runner assembly...", file=sys.stderr)
 
-    print("[INFO] Running runner assembly engine (pipeline/edit.py)...")
+    print("[INFO] Executing runner assembly engine (pipeline/edit.py)...")
     sys.path.insert(0, os.path.dirname(__file__))
     from edit import run_assembly
     run_assembly(slug)
