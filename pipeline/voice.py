@@ -232,6 +232,12 @@ def build_voice_pipeline(slug="prevent-prompt-injection-langchain-nemo"):
     phonetic_text = apply_pronunciation(spoken, rules)
     qc_text = split_long_sentences(phonetic_text, max_words=22)
 
+    qc_path = os.path.join(build_dir, "voice_script_qc.txt")
+    with open(qc_path, "w", encoding="utf-8") as f:
+        f.write(qc_text)
+    word_count = len(qc_text.split())
+    print(f"[INFO] Processed spoken text for TTS: {word_count} words -> {qc_path}")
+
     raw_wav = os.path.join(build_dir, "vo_raw.wav")
     master_wav = os.path.join(build_dir, "vo_master.wav")
 

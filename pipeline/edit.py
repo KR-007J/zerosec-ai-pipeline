@@ -144,21 +144,40 @@ def assemble_master(input_video, input_vo, bg_music, ass_subs, output_master, du
     print(f"[SUCCESS] Master video created -> {output_master}")
     return output_master
 
-def export_shorts(input_master, output_dir, total_duration):
+def export_shorts(input_master, output_dir, total_duration, manifest_path=None):
     os.makedirs(output_dir, exist_ok=True)
     print("[INFO] Exporting 3 high-retention vertical Shorts (1080x1920)...")
 
-    # Adapt short duration to total video duration (max 12s, min 5s)
-    dur = min(12.0, max(5.0, total_duration / 4.0))
-    s1_start = 0.0
-    s2_start = min(max(s1_start + dur, total_duration * 0.35), max(0.0, total_duration - dur))
-    s3_start = min(max(s2_start + dur, total_duration * 0.70), max(0.0, total_duration - dur))
+    segments = []
+    if manifest_path and os.path.exists(manifest_path):
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                manifest_data = json.load(f)
+                raw_shorts = manifest_data.get("shorts", [])
+                for s in raw_shorts:
+                    start_sec = min(float(s.get("start", 0)), max(0.0, total_duration - 5.0))
+                    dur_sec = min(float(s.get("duration", 14.0)), max(5.0, total_duration - start_sec))
+                    segments.append({
+                        "name": s.get("name", "short.mp4"),
+                        "start": start_sec,
+                        "duration": dur_sec,
+                        "hook": s.get("hook", "ZeroSec AI Security")
+                    })
+            print(f"[INFO] Loaded {len(segments)} curated Shorts from manifest: {manifest_path}")
+        except Exception as e:
+            print(f"[WARN] Failed to parse shorts manifest ({e}). Falling back to dynamic calculation.", file=sys.stderr)
 
-    segments = [
-        {"name": "short_1_exploit_threat.mp4", "start": s1_start, "duration": dur, "hook": "Can you hijack LangChain in 10 lines?"},
-        {"name": "short_2_colang_rails.mp4", "start": s2_start, "duration": dur, "hook": "How NeMo Guardrails Works"},
-        {"name": "short_3_blocked_defense.mp4", "start": s3_start, "duration": dur, "hook": "Prompt Injection BLOCKED at runtime"}
-    ]
+    if not segments:
+        # Dynamic fallback based on video duration
+        dur = min(14.0, max(5.0, total_duration / 4.0))
+        s1_start = 0.0
+        s2_start = min(max(s1_start + dur, total_duration * 0.35), max(0.0, total_duration - dur))
+        s3_start = min(max(s2_start + dur, total_duration * 0.70), max(0.0, total_duration - dur))
+        segments = [
+            {"name": "short_1_exploit_threat.mp4", "start": s1_start, "duration": dur, "hook": "Can Prompt Injection Hijack Your LLM?"},
+            {"name": "short_2_colang_rails.mp4", "start": s2_start, "duration": dur, "hook": "How NVIDIA NeMo Guardrails Works"},
+            {"name": "short_3_blocked_defense.mp4", "start": s3_start, "duration": dur, "hook": "Prompt Injection BLOCKED at Runtime"}
+        ]
 
     exported = []
     for s in segments:
@@ -184,7 +203,7 @@ def export_shorts(input_master, output_dir, total_duration):
             out_path
         ]
         subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-        print(f"[SUCCESS] Short generated -> {out_path}")
+        print(f"[SUCCESS] Short generated -> {out_path} (Start: {s['start']:.1f}s, Dur: {s['duration']:.1f}s, Hook: '{s['hook']}')")
         exported.append(out_path)
 
     return exported
@@ -198,6 +217,7 @@ def run_assembly(slug="prevent-prompt-injection-langchain-nemo"):
     shorts_dir = os.path.join(build_dir, "shorts")
     ass_subs = os.path.join(build_dir, "subtitles.ass")
     json_transcription = os.path.join(build_dir, "transcription.json")
+    manifest_path = os.path.join(build_dir, "shorts_manifest.json")
 
     # If input.mp4 does not exist in build dir (e.g. clean CI runner), generate placeholder recording
     if not os.path.exists(input_video):
@@ -215,8 +235,8 @@ def run_assembly(slug="prevent-prompt-injection-langchain-nemo"):
     # 2. Assemble 1080p master video matching exact voice duration
     assemble_master(input_video, input_vo, BG_MUSIC_DEFAULT, ass_subs, output_master, duration_sec=duration_sec)
 
-    # 3. Export 3 vertical Shorts based on dynamic timestamps
-    shorts = export_shorts(output_master, shorts_dir, total_duration=duration_sec)
+    # 3. Export 3 vertical Shorts based on curated manifest and dynamic timestamps
+    shorts = export_shorts(output_master, shorts_dir, total_duration=duration_sec, manifest_path=manifest_path)
 
     print(f"[SUCCESS] Local CPU Assembly complete! Master: {output_master} (Duration: {duration_sec:.1f}s)")
     return output_master, shorts

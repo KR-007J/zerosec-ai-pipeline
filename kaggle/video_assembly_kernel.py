@@ -108,7 +108,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     print(f"[SUCCESS] Transcribed {len(dialogue_events)} dialogue segments -> {output_ass}")
     return output_ass, info.duration
 
-def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, working_dir, duration_sec=None):
+def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, working_dir, duration_sec=None, manifest_path=None):
     master_path = os.path.join(working_dir, "master.mp4")
     shorts_dir = os.path.join(working_dir, "shorts")
     os.makedirs(shorts_dir, exist_ok=True)
@@ -158,18 +158,31 @@ def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, worki
     subprocess.run(cmd_master, check=True)
     print(f"[SUCCESS] Master video rendered -> {master_path}")
 
-    # Export 3 Vertical Shorts (1080x1920) with dynamic duration scaling
+    # Export 3 Vertical Shorts (1080x1920)
     total_dur = duration_sec if duration_sec else 24.0
-    dur = min(12.0, max(5.0, total_dur / 4.0))
-    s1_start = 0.0
-    s2_start = min(max(s1_start + dur, total_dur * 0.35), max(0.0, total_dur - dur))
-    s3_start = min(max(s2_start + dur, total_dur * 0.70), max(0.0, total_dur - dur))
+    shorts_specs = []
+    if manifest_path and os.path.exists(manifest_path):
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                mdata = json.load(f)
+                for s in mdata.get("shorts", []):
+                    start_s = min(float(s.get("start", 0)), max(0.0, total_dur - 5.0))
+                    dur_s = min(float(s.get("duration", 14.0)), max(5.0, total_dur - start_s))
+                    shorts_specs.append((s.get("name", "short.mp4"), start_s, dur_s, s.get("hook", "ZeroSec AI Security")))
+            print(f"[INFO] Using {len(shorts_specs)} Shorts from manifest: {manifest_path}")
+        except Exception as e:
+            print(f"[WARN] Failed to load shorts manifest ({e}). Using dynamic fallback.", file=sys.stderr)
 
-    shorts_specs = [
-        ("short_1_exploit_threat.mp4", s1_start, dur, "Can you hijack LangChain in 10 lines?"),
-        ("short_2_colang_rails.mp4", s2_start, dur, "How NeMo Guardrails Works"),
-        ("short_3_blocked_defense.mp4", s3_start, dur, "Prompt Injection BLOCKED at runtime")
-    ]
+    if not shorts_specs:
+        dur = min(14.0, max(5.0, total_dur / 4.0))
+        s1_start = 0.0
+        s2_start = min(max(s1_start + dur, total_dur * 0.35), max(0.0, total_dur - dur))
+        s3_start = min(max(s2_start + dur, total_dur * 0.70), max(0.0, total_dur - dur))
+        shorts_specs = [
+            ("short_1_exploit_threat.mp4", s1_start, dur, "Can Prompt Injection Hijack Your LLM?"),
+            ("short_2_colang_rails.mp4", s2_start, dur, "How NVIDIA NeMo Guardrails Works"),
+            ("short_3_blocked_defense.mp4", s3_start, dur, "Prompt Injection BLOCKED at Runtime")
+        ]
 
     for fname, start_sec, dur_sec, hook in shorts_specs:
         out_short = os.path.join(shorts_dir, fname)
@@ -202,12 +215,14 @@ def main():
     videos = []
     audios = []
     musics = []
+    manifests = []
 
     for d in search_dirs:
         if os.path.exists(d):
             videos.extend(glob.glob(os.path.join(d, "**", "*input*.mp4"), recursive=True))
             audios.extend(glob.glob(os.path.join(d, "**", "*vo_master*.wav"), recursive=True))
             musics.extend(glob.glob(os.path.join(d, "**", "*background*.wav"), recursive=True))
+            manifests.extend(glob.glob(os.path.join(d, "**", "*shorts_manifest*.json"), recursive=True))
 
     if not videos or not audios:
         print(f"[ERROR] Required inputs not found in search paths: Videos={videos}, Audios={audios}", file=sys.stderr)
@@ -216,10 +231,13 @@ def main():
     input_video = videos[0]
     input_audio = audios[0]
     bg_music = musics[0] if musics else input_audio
+    manifest_path = manifests[0] if manifests else None
 
     print(f"[INFO] Using Video Input: {input_video}")
     print(f"[INFO] Using Audio Input: {input_audio}")
     print(f"[INFO] Using Ambient BG:  {bg_music}")
+    if manifest_path:
+        print(f"[INFO] Using Shorts Manifest: {manifest_path}")
 
     working_dir = "/kaggle/working" if os.path.exists("/kaggle") else "./build_output"
     os.makedirs(working_dir, exist_ok=True)
@@ -228,7 +246,7 @@ def main():
     output_ass = os.path.join(working_dir, "subtitles.ass")
 
     output_ass, duration_sec = transcribe_audio_whisper(input_audio, output_json, output_ass)
-    render_master_and_shorts(input_video, input_audio, bg_music, output_ass, working_dir, duration_sec=duration_sec)
+    render_master_and_shorts(input_video, input_audio, bg_music, output_ass, working_dir, duration_sec=duration_sec, manifest_path=manifest_path)
 
     print("=== ZeroSec AI Kaggle GPU Worker Completed Successfully ===")
 

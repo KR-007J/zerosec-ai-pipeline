@@ -57,6 +57,10 @@ def stage_and_upload_dataset(username, slug, build_dir, root_dir):
     if os.path.exists(bg_music):
         shutil.copy(bg_music, os.path.join(staging_dir, "background_ambient.wav"))
 
+    shorts_manifest = os.path.join(build_dir, "shorts_manifest.json")
+    if os.path.exists(shorts_manifest):
+        shutil.copy(shorts_manifest, os.path.join(staging_dir, "shorts_manifest.json"))
+
     dataset_slug = f"zerosec-inputs-{slug[:12].strip('-')}"
     dataset_id = f"{username}/{dataset_slug}"
     meta = {

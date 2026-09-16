@@ -25,6 +25,8 @@ package_output/
 !build/**/thumb_*.png
 !build/**/subtitles.ass
 !build/**/transcription.json
+!build/**/shorts_manifest.json
+!build/**/voice_script_qc.txt
 
 # Kaggle credentials
 .kaggle/

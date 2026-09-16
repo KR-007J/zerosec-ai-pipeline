@@ -71,6 +71,8 @@ jobs:
           cp build/$SLUG/thumb_*.png package_output/
           cp build/$SLUG/metadata.txt package_output/
           cp build/$SLUG/script.md package_output/
+          cp build/$SLUG/subtitles.ass package_output/ 2>/dev/null || true
+          cp build/$SLUG/shorts_manifest.json package_output/ 2>/dev/null || true
           tar -czvf "package_output/${SLUG}-release.tar.gz" -C build/$SLUG .
 
       - name: "Upload Packaged Artifacts for Manual YouTube Studio Publishing"

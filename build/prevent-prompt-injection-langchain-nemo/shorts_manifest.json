@@ -1,0 +1,27 @@
+{
+  "video_slug": "prevent-prompt-injection-langchain-nemo",
+  "total_estimated_seconds": 391,
+  "shorts": [
+    {
+      "name": "short_1_exploit_threat.mp4",
+      "beat_title": "Hook & Threat Architecture",
+      "start": 0.0,
+      "duration": 14.0,
+      "hook": "Can Prompt Injection Hijack Your LLM?"
+    },
+    {
+      "name": "short_2_colang_rails.mp4",
+      "beat_title": "Colang Guardrail Implementation",
+      "start": 156.4,
+      "duration": 14.0,
+      "hook": "How NVIDIA NeMo Guardrails Works"
+    },
+    {
+      "name": "short_3_blocked_defense.mp4",
+      "beat_title": "Live Exploit Interception Test",
+      "start": 273.7,
+      "duration": 14.0,
+      "hook": "Prompt Injection BLOCKED at Runtime"
+    }
+  ]
+}

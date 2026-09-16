@@ -12,29 +12,92 @@ Style: Default,DejaVu Sans,22,&H00FFFFFF,&H0000FF9D,&H00000000,&H80000000,-1,0,0
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 0,0:00:00.00,0:00:04.66,Default,,0,0,0,,An LLM agent with direct tool execution is a critical vulnerability waiting to happen.
-Dialogue: 0,0:00:05.05,0:00:08.77,Default,,0,0,0,,If you connect line chain to a shell or database without a deterministic guardrail,
-Dialogue: 0,0:00:09.17,0:00:11.56,Default,,0,0,0,,an attacker can bypass your system prompt in seconds.
-Dialogue: 0,0:00:12.14,0:00:17.51,Default,,0,0,0,,Today, we are setting up Nemo guardrails to stop jailbreaks and prompt injection at the runtime layer.
-Dialogue: 0,0:00:18.01,0:00:21.05,Default,,0,0,0,,Prompt injection isn't a bug you can fix with a longer system prompt.
-Dialogue: 0,0:00:21.60,0:00:26.80,Default,,0,0,0,,Attackers use payload splitting, delimiter injection, and role-playing attacks to override developer instructions.
-Dialogue: 0,0:00:26.80,0:00:34.75,Default,,0,0,0,,Traditional Ridge X and keyword blocklists fail because natural language is infinitely combinatorial, Nemo guardrails.
-Dialogue: 0,0:00:35.07,0:00:40.88,Default,,0,0,0,,Developed by NVIDIA solves this by intercepting user inputs before they reach the model checking responses
-Dialogue: 0,0:00:40.88,0:00:46.35,Default,,0,0,0,,against programmable calling execution flows, setting up the isolated sandbox and dependencies.
-Dialogue: 0,0:00:46.93,0:00:49.57,Default,,0,0,0,,We begin by spinning up an isolated virtual environment.
-Dialogue: 0,0:00:49.57,0:00:58.85,Default,,0,0,0,,Always test LLM tools inside an unprivileged sandbox or a disposable cloud VPSO test scripts cannot touch sensitive environment variables.
-Dialogue: 0,0:00:59.39,0:01:03.00,Default,,0,0,0,,Defining calling security rails for input and output guardrails.
-Dialogue: 0,0:01:03.20,0:01:06.12,Default,,0,0,0,,In Nemo guardrails, policies are declared in calling.
-Dialogue: 0,0:01:06.73,0:01:12.76,Default,,0,0,0,,We define an input rail that detects gelbrick attempts dot routes the conversation to a safe refusal state
-Dialogue: 0,0:01:12.76,0:01:18.26,Default,,0,0,0,,before any line chain tool or downstream API receives the malicious token payload, live test,
-Dialogue: 0,0:01:18.26,0:01:25.45,Default,,0,0,0,,injecting exploit payloads via guardrail defense when we execute our test harness against the naked line chain agent.
-Dialogue: 0,0:01:26.01,0:01:34.37,Default,,0,0,0,,The injection succeeds, but when routed through the Nemo LLM rails wrapper, the guardrail triggers an instant block with zero tokens leaked to the underlying model,
-Dialogue: 0,0:01:34.68,0:01:45.71,Default,,0,0,0,,while Nemo guardrails significantly hardens your application it adds between 200 to 450 milliseconds of latency per request depending on whether you use self-hosted embeddings
-Dialogue: 0,0:01:45.71,0:01:48.12,Default,,0,0,0,,or PI based classification models.
-Dialogue: 0,0:01:48.59,0:01:54.87,Default,,0,0,0,,Additionally, over restrictive semantic rules can introduce false positive refusals on benign developer questions
-Dialogue: 0,0:01:54.87,0:02:00.40,Default,,0,0,0,,for any production agent that executes SQL queries, file I slash O, or web requests,
-Dialogue: 0,0:02:00.85,0:02:04.15,Default,,0,0,0,,relying solely on prompt engineering is irresponsible engineering.
-Dialogue: 0,0:02:04.62,0:02:10.65,Default,,0,0,0,,Nemo guardrails provides a defensible programmable boundary that belongs in your production security stack.
-Dialogue: 0,0:02:10.65,0:02:15.74,Default,,0,0,0,,All configuration files and test scripts are linked in the GitHub repository in the description.
-Dialogue: 0,0:02:16.30,0:02:23.81,Default,,0,0,0,,If you are deploying this to the cloud, use the isolated VPS link below for $200 in free credits to test without risking your infrastructure.
-Dialogue: 0,0:02:24.59,0:02:28.13,Default,,0,0,0,,Let me know in the comments what guardrails are you currently running in production?
+Dialogue: 0,0:00:00.00,0:00:04.79,Default,,0,0,0,,An LLM agent with direct tool execution is an unauthenticated remote code execution
+Dialogue: 0,0:00:04.79,0:00:10.56,Default,,0,0,0,,vulnerability waiting to happen if you connect line chain to a shell, a database, or a web
+Dialogue: 0,0:00:10.56,0:00:14.82,Default,,0,0,0,,scraper without a deterministic guardrail, an attacker can bypass your system prompt
+Dialogue: 0,0:00:14.82,0:00:19.62,Default,,0,0,0,,in under 10 seconds, the moment an external user supplies input that reaches your model,
+Dialogue: 0,0:00:20.03,0:00:22.48,Default,,0,0,0,,prompt engineering ceases to be a security boundary.
+Dialogue: 0,0:00:22.89,0:00:28.53,Default,,0,0,0,,Today, we are deploying NVIDIA NIMO guardrails to intercept jailbreaks in direct prompt
+Dialogue: 0,0:00:28.53,0:00:33.65,Default,,0,0,0,,injections at the Runtem layer before a single malicious token ever executes in your application.
+Dialogue: 0,0:00:34.14,0:00:39.17,Default,,0,0,0,,Prompt injection is not a traditional software bug that can be patched with RegX or longer
+Dialogue: 0,0:00:39.17,0:00:39.92,Default,,0,0,0,,system instructions.
+Dialogue: 0,0:00:40.67,0:00:45.78,Default,,0,0,0,,In classical software security, we maintain a strict architectural boundary between control
+Dialogue: 0,0:00:45.78,0:00:47.93,Default,,0,0,0,,instructions and untrusted user data.
+Dialogue: 0,0:00:48.34,0:00:53.60,Default,,0,0,0,,In large language models, however, instructions and data are concatenated into a single flat
+Dialogue: 0,0:00:53.60,0:00:58.97,Default,,0,0,0,,token stream, this fundamental architectural reality enables attackers to execute payload
+Dialogue: 0,0:00:58.97,0:01:04.37,Default,,0,0,0,,splitting, delimiter injection, and role-playing jailbreaks that systematically override your
+Dialogue: 0,0:01:04.37,0:01:05.07,Default,,0,0,0,,developer instructions.
+Dialogue: 0,0:01:05.93,0:01:11.21,Default,,0,0,0,,Many engineering teams attempt to defend against this with simple RegX filters or keyword block
+Dialogue: 0,0:01:11.21,0:01:11.50,Default,,0,0,0,,lists.
+Dialogue: 0,0:01:11.85,0:01:16.95,Default,,0,0,0,,This approach is completely ineffective in production because natural language is infinitely
+Dialogue: 0,0:01:22.42,0:01:23.20,Default,,0,0,0,,combinatorial.
+Dialogue: 0,0:01:23.20,0:01:27.93,Default,,0,0,0,,Or use multilingual translation chains to bypass static pattern matching without degrading
+Dialogue: 0,0:01:27.93,0:01:29.04,Default,,0,0,0,,LLM comprehension.
+Dialogue: 0,0:01:29.62,0:01:35.40,Default,,0,0,0,,NVIDIA NIMO guardrails addresses this architectural weakness by inserting a programmable deterministic
+Dialogue: 0,0:01:35.40,0:01:38.29,Default,,0,0,0,,mediation layer between the user and the language model.
+Dialogue: 0,0:01:38.71,0:01:44.92,Default,,0,0,0,,Instead of relying on the LLM to self-police its own output, NIMO enforces programmable execution
+Dialogue: 0,0:01:44.92,0:01:50.14,Default,,0,0,0,,flows written and culling a specialized modeling language designed specifically for conversational
+Dialogue: 0,0:01:50.14,0:01:50.64,Default,,0,0,0,,safety.
+Dialogue: 0,0:01:50.64,0:01:56.07,Default,,0,0,0,,Setting up the isolated sandbox and dependencies, we begin by establishing an isolated development
+Dialogue: 0,0:01:56.07,0:01:57.00,Default,,0,0,0,,environment.
+Dialogue: 0,0:01:57.23,0:02:03.04,Default,,0,0,0,,When developing or testing LLM security, guardrails you must never execute untrusted test scripts
+Dialogue: 0,0:02:03.59,0:02:07.84,Default,,0,0,0,,directly on your host operating system or in an environment with access to production
+Dialogue: 0,0:02:07.84,0:02:08.28,Default,,0,0,0,,credentials.
+Dialogue: 0,0:02:08.96,0:02:14.91,Default,,0,0,0,,Always spin up a dedicated virtual environment inside a disposable cloud VPS or an unprivileged
+Dialogue: 0,0:02:14.91,0:02:15.47,Default,,0,0,0,,container.
+Dialogue: 0,0:02:15.81,0:02:21.41,Default,,0,0,0,,This guarantees that if a prompt injection test manages to trigger a local tool or shell
+Dialogue: 0,0:02:21.41,0:02:26.91,Default,,0,0,0,,command, the blast radius is strictly contained to a sandbox with zero access to your primary
+Dialogue: 0,0:02:26.91,0:02:28.84,Default,,0,0,0,,cloud keys or environment variables.
+Dialogue: 0,0:02:29.31,0:02:34.53,Default,,0,0,0,,Once the environment is initialized, we install Lang Chain alongside NIMO guardrails and our
+Dialogue: 0,0:02:34.53,0:02:39.02,Default,,0,0,0,,LLM client, defining call and security rails for input and output guardrails.
+Dialogue: 0,0:02:39.31,0:02:43.75,Default,,0,0,0,,In NIMO guardrails, defensive policies are declared declaratively using culling.
+Dialogue: 0,0:02:43.75,0:02:49.78,Default,,0,0,0,,In our project configuration, we define two primary defensive boundaries, an input rail
+Dialogue: 0,0:02:49.78,0:02:50.71,Default,,0,0,0,,and an output rail.
+Dialogue: 0,0:02:51.09,0:02:55.50,Default,,0,0,0,,The input rail intercepts incoming user prompts before they reach the underlying model.
+Dialogue: 0,0:02:55.87,0:03:01.03,Default,,0,0,0,,We define canonical user intents for jailbreak attempts, such as requests to ignore system
+Dialogue: 0,0:03:01.03,0:03:06.80,Default,,0,0,0,,rules, leak instructions, or execute unapproved shell operations when NIMO's semantic router
+Dialogue: 0,0:03:06.80,0:03:09.84,Default,,0,0,0,,matches incoming tokens against these adversarial patterns.
+Dialogue: 0,0:03:10.56,0:03:15.53,Default,,0,0,0,,It redirects the dialogue flow directly to a safe refusal branch, returning a sanitized
+Dialogue: 0,0:03:15.53,0:03:19.40,Default,,0,0,0,,response without invoking the Lang Chain agent, complementing the input rail.
+Dialogue: 0,0:03:19.93,0:03:24.71,Default,,0,0,0,,We configure an output rail that inspects the model's generated text prior to returning
+Dialogue: 0,0:03:24.71,0:03:25.34,Default,,0,0,0,,it to the user.
+Dialogue: 0,0:03:25.81,0:03:30.53,Default,,0,0,0,,This ensures that even if an indirect prompt injection succeeds in confusing the model
+Dialogue: 0,0:03:30.53,0:03:39.81,Default,,0,0,0,,during multi-turn retrieval, the output rail detects sensitive data patterns such as a
+Dialogue: 0,0:03:39.81,0:03:42.36,Default,,0,0,0,,command masks them dynamically before they leave your boundary.
+Dialogue: 0,0:03:42.81,0:03:46.52,Default,,0,0,0,,Live test, injecting exploit payloads via guardrail defense.
+Dialogue: 0,0:03:47.02,0:03:50.40,Default,,0,0,0,,Now let us test both architectures under live adversarial conditions.
+Dialogue: 0,0:03:51.03,0:03:54.80,Default,,0,0,0,,We begin by executing our automated test harness against a standard.
+Dialogue: 0,0:03:55.28,0:04:00.02,Default,,0,0,0,,Unshielded Lang Chain agent, we transmit a classic delimiter injection payload designed
+Dialogue: 0,0:04:00.02,0:04:04.62,Default,,0,0,0,,to break out of the system context command the tool calling agent to read the host environment
+Dialogue: 0,0:04:04.62,0:04:09.28,Default,,0,0,0,,because the model cannot distinguish between developer constraints and untrusted input,
+Dialogue: 0,0:04:09.84,0:04:12.75,Default,,0,0,0,,the attack succeeds, and the agent attempts tool invocation.
+Dialogue: 0,0:04:13.59,0:04:19.01,Default,,0,0,0,,Next, we run the exact same malicious payload against our application wrapped with NIMO's
+Dialogue: 0,0:04:19.01,0:04:24.60,Default,,0,0,0,,LLM Rails engine, observe the terminal output, the input rail immediately intercepts the vector
+Dialogue: 0,0:04:24.60,0:04:30.33,Default,,0,0,0,,representation of the prompt, identifies the jailbreak intent, halts execution within 40 milliseconds,
+Dialogue: 0,0:04:31.18,0:04:35.56,Default,,0,0,0,,zero tokens are transmitted to the downstream Lang Chain tools, and the attacker receives
+Dialogue: 0,0:04:35.56,0:04:37.27,Default,,0,0,0,,a standardized refusal message.
+Dialogue: 0,0:04:37.75,0:04:40.72,Default,,0,0,0,,The execution loop is completely neutralized at the perimeter.
+Dialogue: 0,0:04:41.33,0:04:45.93,Default,,0,0,0,,While NIMO guardrails establishes a robust defense-in-depth perimeter, implementing run
+Dialogue: 0,0:04:45.93,0:04:48.56,Default,,0,0,0,,in guardrails is not without engineering trade-offs.
+Dialogue: 0,0:04:49.00,0:04:51.16,Default,,0,0,0,,The primary cost is end-to-end inference latency.
+Dialogue: 0,0:04:51.89,0:04:56.39,Default,,0,0,0,,Depending on whether you utilize self-hosted local embedding models or cloud-based API
+Dialogue: 0,0:04:56.39,0:04:58.22,Default,,0,0,0,,classifiers for intent matching.
+Dialogue: 0,0:04:58.94,0:05:04.19,Default,,0,0,0,,NIMO introduces an overhead of between 200 to 450 milliseconds per user query.
+Dialogue: 0,0:05:04.66,0:05:09.92,Default,,0,0,0,,Furthermore, poorly calibrated semantic boundaries can lead to false positive refusals on legitimate
+Dialogue: 0,0:05:09.92,0:05:13.33,Default,,0,0,0,,developer prompts that contain technical security terms.
+Dialogue: 0,0:05:13.86,0:05:18.54,Default,,0,0,0,,Tuning your culling threshold parameters is essential to prevent degrading user experience
+Dialogue: 0,0:05:19.06,0:05:20.87,Default,,0,0,0,,while maintaining stringent defensive guarantees.
+Dialogue: 0,0:05:21.74,0:05:25.93,Default,,0,0,0,,If you are deploying autonomous LLM agents with access to SQL databases,
+Dialogue: 0,0:05:26.66,0:05:32.69,Default,,0,0,0,,file systems, internal APIs, or code execution tools, relying on system prompts alone is
+Dialogue: 0,0:05:32.69,0:05:34.30,Default,,0,0,0,,an unacceptable security failure.
+Dialogue: 0,0:05:34.68,0:05:38.60,Default,,0,0,0,,Prompt engineering is a guidance mechanism, not an access control system.
+Dialogue: 0,0:05:39.06,0:05:44.25,Default,,0,0,0,,NVIDi and NIMO guardrails gives you a programmable, auditable security proxy that belongs in
+Dialogue: 0,0:05:44.25,0:05:45.66,Default,,0,0,0,,every production AI architecture.
+Dialogue: 0,0:05:46.37,0:05:49.83,Default,,0,0,0,,All the culling configuration files, Docker sandbox templates,
+Dialogue: 0,0:05:50.36,0:05:54.93,Default,,0,0,0,,attack test scripts demonstrated in this video are open source available in the GitHub
+Dialogue: 0,0:05:54.93,0:05:56.22,Default,,0,0,0,,repository linked below.
+Dialogue: 0,0:05:56.80,0:06:00.43,Default,,0,0,0,,If you need an isolated cloud sandbox to test these rails safely,
+Dialogue: 0,0:06:01.00,0:06:04.89,Default,,0,0,0,,check out the VPS partner link in the description for $200 in free credits,
+Dialogue: 0,0:06:05.19,0:06:07.06,Default,,0,0,0,,what guardrails or sanitization layers.
+Dialogue: 0,0:06:07.75,0:06:10.39,Default,,0,0,0,,Are you currently implementing in your production AI pipeline?
+Dialogue: 0,0:06:10.92,0:06:12.22,Default,,0,0,0,,Let me know in the comments below.
