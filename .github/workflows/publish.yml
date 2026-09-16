@@ -15,56 +15,56 @@ jobs:
   build-and-verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: "Checkout Repository"
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: "Set up Python 3.11"
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install FFmpeg & Audio Codecs
+      - name: "Install FFmpeg & Audio Codecs"
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
-      - name: Install Pipeline Dependencies
+      - name: "Install Pipeline Dependencies"
         run: |
           python -m pip install --upgrade pip
-          pip install edge-tts Pillow requests kaggle gradio_client
+          pip install piper-tts Pillow requests kaggle gradio_client
 
-      - name: Phase 2 & 3: Script & Real Neural Voice Synthesis
+      - name: "Phase 2 and 3 - Script & Real Neural Voice Synthesis"
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          SLUG="${{ github.event.inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}"
+          SLUG="${{ inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}"
           python3 pipeline/script.py --slug "$SLUG"
           python3 pipeline/voice.py --slug "$SLUG"
 
-      - name: Phase 4: Assembly & GPU Offload Bridge (Kaggle or Local Runner)
+      - name: "Phase 4 - Assembly & GPU Offload Bridge (Kaggle or Local Runner)"
         env:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         run: |
-          SLUG="${{ github.event.inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}"
+          SLUG="${{ inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}"
           python3 pipeline/kaggle_runner.py --slug "$SLUG"
 
-      - name: Phase 5: Packaging (Thumbnails & Metadata)
+      - name: "Phase 5 - Packaging (Thumbnails & Metadata)"
         run: |
-          SLUG="${{ github.event.inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}"
+          SLUG="${{ inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}"
           python3 pipeline/thumbnail.py --slug "$SLUG"
           python3 pipeline/metadata.py --slug "$SLUG"
 
-      - name: Phase 6: Hard Quality Gate Verification
+      - name: "Phase 6 - Hard Quality Gate Verification"
         run: |
-          SLUG="${{ github.event.inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}"
+          SLUG="${{ inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}"
           python3 scripts/verify_gate.py --slug "$SLUG"
 
-      - name: Package Video Release Artifacts
+      - name: "Package Video Release Artifacts"
         if: success()
         run: |
-          SLUG="${{ github.event.inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}"
+          SLUG="${{ inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}"
           mkdir -p package_output
           cp build/$SLUG/master.mp4 package_output/
           cp -r build/$SLUG/shorts package_output/
@@ -73,9 +73,9 @@ jobs:
           cp build/$SLUG/script.md package_output/
           tar -czvf "package_output/${SLUG}-release.tar.gz" -C build/$SLUG .
 
-      - name: Upload Packaged Artifacts for Manual YouTube Studio Publishing
+      - name: "Upload Packaged Artifacts for Manual YouTube Studio Publishing"
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}-release
+          name: ${{ inputs.slug || 'prevent-prompt-injection-langchain-nemo' }}-release
           path: package_output/
           retention-days: 14
