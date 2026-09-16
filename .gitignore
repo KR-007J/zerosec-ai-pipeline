@@ -27,3 +27,6 @@ package_output/
 # Kaggle credentials
 .kaggle/
 kaggle.json
+
+# Piper ONNX model binaries (auto-downloaded on first run)
+assets/models/**/*.onnx

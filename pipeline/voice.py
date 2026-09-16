@@ -1,13 +1,19 @@
 #!/usr/bin/env python3
 """
 ZeroSec AI Voice Engine - Phase 3
-Generates production-grade neural voice narration using Edge Neural TTS / Kokoro-82M.
-ZERO fake fallbacks. Produces genuine, articulate tech documentary speech.
-Enforces:
-1. Pronunciation dictionary regex replacement before synthesis.
-2. Sentence length QC check (splits long sentences to <= 22 words).
-3. Universal broadcast mastering: highpass, high-frequency de-harshing, compression, loudnorm -14 LUFS.
-4. Audio clipping QC check.
+Generates production-grade neural voice narration using:
+1. Piper TTS (100% Open Source, Apache 2.0, self-hosted ONNX, zero ToS risk) [PRIMARY]
+2. Kokoro-82M on Hugging Face Spaces [SECONDARY]
+3. Edge Neural TTS [FALLBACK]
+ZERO fake sine-wave fallbacks. Fails loud if real audio cannot be produced.
+
+Broadcast Chain:
+- Pronunciation regex substitution
+- Sentence splitting (<= 22 words)
+- Highpass filter (80Hz)
+- Equalizer de-harshing (6kHz)
+- Dynamics compression
+- EBU R128 Loudness Normalization (-14 LUFS, TP -1.5dB)
 """
 
 import os
@@ -17,8 +23,12 @@ import json
 import asyncio
 import subprocess
 import argparse
+import urllib.request
 
 PRONUNCIATION_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config", "pronunciation.json"))
+PIPER_MODEL_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", "models", "piper"))
+PIPER_ONNX_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx"
+PIPER_JSON_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json"
 
 def load_pronunciation_rules():
     if os.path.exists(PRONUNCIATION_FILE):
@@ -80,43 +90,76 @@ def extract_spoken_text(script_markdown):
             spoken.append(clean_line)
     return "\n\n".join(spoken)
 
-async def synthesize_edge_tts(text, output_path, voice="en-US-ChristopherNeural"):
+def ensure_piper_model():
     """
-    Synthesizes natural, broadcast-grade speech using Edge Neural TTS.
-    100% free, zero API keys, no cold starts.
+    Ensures the open-source Piper ONNX model is available locally.
     """
+    os.makedirs(PIPER_MODEL_DIR, exist_ok=True)
+    onnx_path = os.path.join(PIPER_MODEL_DIR, "en_US-lessac-medium.onnx")
+    json_path = os.path.join(PIPER_MODEL_DIR, "en_US-lessac-medium.onnx.json")
+
+    if not os.path.exists(json_path):
+        print(f"[INFO] Fetching open-source Piper voice config...")
+        urllib.request.urlretrieve(PIPER_JSON_URL, json_path)
+
+    if not os.path.exists(onnx_path):
+        print(f"[INFO] Fetching open-source Piper ONNX model (~60MB, one-time download)...")
+        urllib.request.urlretrieve(PIPER_ONNX_URL, onnx_path)
+
+    return onnx_path, json_path
+
+def synthesize_with_piper(text, output_raw_wav):
+    """
+    Primary: Synthesizes speech using 100% open-source Piper ONNX engine.
+    Self-hosted, CPU-friendly, zero external API or ToS risk.
+    """
+    onnx_path, json_path = ensure_piper_model()
+    # Locate piper binary in venv or path
+    piper_bin = "piper"
+    venv_piper = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".venv", "bin", "piper"))
+    if os.path.exists(venv_piper):
+        piper_bin = venv_piper
+
+    print(f"[INFO] Synthesizing speech using open-source Piper neural model...")
+    cmd = [
+        piper_bin,
+        "-m", onnx_path,
+        "-c", json_path,
+        "-f", output_raw_wav
+    ]
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    stdout, stderr = proc.communicate(input=text)
+    if proc.returncode == 0 and os.path.exists(output_raw_wav) and os.path.getsize(output_raw_wav) > 1000:
+        print(f"[SUCCESS] Piper neural speech synthesized -> {output_raw_wav}")
+        return True
+    else:
+        raise RuntimeError(f"Piper execution failed: {stderr}")
+
+async def synthesize_with_edge(text, output_mp3):
     import edge_tts
-    print(f"[INFO] Synthesizing neural speech with voice '{voice}'...")
-    communicate = edge_tts.Communicate(text, voice)
-    await communicate.save(output_path)
-    return output_path
+    communicate = edge_tts.Communicate(text, "en-US-ChristopherNeural")
+    await communicate.save(output_mp3)
 
 def synthesize_audio(text, output_raw_wav):
     """
-    Synthesizes real human voice.
-    Primary: Edge Neural TTS (en-US-ChristopherNeural)
-    Secondary: Kokoro-82M HF Space
-    FAIL if real TTS cannot be reached (zero sine-wave stubs).
+    Synthesis Pipeline:
+    1. Try Piper (100% open source ONNX)
+    2. Try Kokoro-82M on HF
+    3. Try Edge-TTS
+    4. Hard-fail loud if real audio cannot be produced.
     """
-    temp_mp3 = output_raw_wav.replace(".wav", ".mp3")
-
-    # Try Edge Neural TTS
+    # 1. Try Piper TTS (Open Source, Zero ToS Risk)
     try:
-        asyncio.run(synthesize_edge_tts(text, temp_mp3))
-        # Convert MP3 to 24kHz / 48kHz WAV
-        cmd = ["ffmpeg", "-y", "-i", temp_mp3, "-ar", "48000", output_raw_wav]
-        subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-        if os.path.exists(temp_mp3):
-            os.remove(temp_mp3)
-        print(f"[SUCCESS] Real neural speech synthesized -> {output_raw_wav}")
-        return True
-    except Exception as e_edge:
-        print(f"[WARN] Edge-TTS error: {e_edge}. Attempting Kokoro-82M on Hugging Face...", file=sys.stderr)
+        if synthesize_with_piper(text, output_raw_wav):
+            return True
+    except Exception as e_piper:
+        print(f"[WARN] Piper TTS not available or failed ({e_piper}). Trying alternatives...", file=sys.stderr)
 
-    # Try Kokoro-82M via gradio_client
+    # 2. Try Kokoro-82M on HF Spaces
     try:
         from gradio_client import Client
         hf_token = os.environ.get("HF_TOKEN", None)
+        print("[INFO] Attempting Kokoro-82M HF Space synthesis...")
         client = Client("hexgrad/Kokoro-82M", hf_token=hf_token)
         result = client.predict(text=text, voice="am_adam", api_name="/predict")
         if os.path.exists(result):
@@ -125,17 +168,30 @@ def synthesize_audio(text, output_raw_wav):
             print(f"[SUCCESS] Kokoro-82M speech synthesized -> {output_raw_wav}")
             return True
     except Exception as e_hf:
-        print(f"[ERROR] Kokoro HF Space also failed: {e_hf}", file=sys.stderr)
+        print(f"[WARN] Kokoro HF Space unavailable ({e_hf})...", file=sys.stderr)
 
-    raise RuntimeError("CRITICAL: Failed to synthesize real voice! Pipeline will not ship videos with fake or missing audio.")
+    # 3. Try Edge-TTS as tertiary fallback
+    try:
+        temp_mp3 = output_raw_wav.replace(".wav", ".mp3")
+        print("[INFO] Attempting Edge-TTS fallback...")
+        asyncio.run(synthesize_with_edge(text, temp_mp3))
+        subprocess.run(["ffmpeg", "-y", "-i", temp_mp3, "-ar", "48000", output_raw_wav], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if os.path.exists(temp_mp3):
+            os.remove(temp_mp3)
+        print(f"[SUCCESS] Edge-TTS speech synthesized -> {output_raw_wav}")
+        return True
+    except Exception as e_edge:
+        print(f"[ERROR] Edge-TTS also failed: {e_edge}", file=sys.stderr)
+
+    raise RuntimeError("FATAL: All real speech synthesis engines failed. Pipeline will not output videos with missing or fake audio.")
 
 def post_process_audio(input_wav, output_master_wav):
     """
-    Applies broadcast audio mastering using standard FFmpeg filters:
-    - Highpass at 80Hz (cuts rumble)
-    - Equalizer de-harshing at 6kHz (universal de-esser)
-    - Compression for consistent presence
-    - EBU R128 YouTube standard loudnorm (-14 LUFS, True Peak -1.5dB)
+    Universal broadcast mastering chain:
+    - Highpass 80Hz
+    - Equalizer de-harshing (6kHz)
+    - Dynamics compressor
+    - EBU R128 YouTube loudnorm (-14 LUFS, TP -1.5dB)
     """
     print("[INFO] Applying universal broadcast audio mastering (loudnorm -14 LUFS)...")
     filter_chain = (

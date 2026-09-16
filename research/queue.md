@@ -1,5 +1,5 @@
 # 🛡️ ZeroSec AI Topic Research Queue (Ranked Top 20)
-*Generated automatically on: 2026-09-16 14:35:41 UTC*
+*Generated automatically on: 2026-09-16 14:55:22 UTC*
 
 > **Formula:** `Score = (Demand × Freshness × DemoFeasibility × AffiliateMatch) / 100`
 > **Policy:** 100% Defensive / Blue-Team / Review content. Zero exploit code.
@@ -13,12 +13,12 @@
 | **5** | **66.74** | `Secure Dockerized LLM Inference with Rootless Containers and Seccomp` | *docker rootless llm security container hardening* | Docker, vLLM/Ollama, Linux seccomp profile | Cloud Infrastructure |
 | **6** | **64.08** | `Analyzing LLM SSRF Vulnerabilities in Retrieval-Augmented Generation (RAG)` | *rag ssrf vector database security fix* | Qdrant/Chroma, Python RAG crawler, network egress filtering | Network & Intelligence / Proxies |
 | **7** | **58.19** | `Enforcing HTTPS/TLS Client Certificate Auth (mTLS) for Internal Microservices` | *setup mtls internal microservices caddy python* | Caddy / Nginx, OpenSSL, Python FastAPI | Network Privacy |
-| **8** | **55.64** | `Hands-on Defensive Evaluation: toolhive-registry-server Security Architecture` | *toolhive-registry-server security review benchmark* | Go, Git, Docker | Cloud Infrastructure / VPS |
-| **9** | **55.64** | `Hands-on Defensive Evaluation: burp-idor Security Architecture` | *burp-idor security review benchmark* | Python, Git, Docker | Cloud Infrastructure / VPS |
-| **10** | **55.64** | `Hands-on Defensive Evaluation: Vexa-Agent-Control Security Architecture` | *vexa-agent-control security review benchmark* | Rust, Git, Docker | Cloud Infrastructure / VPS |
-| **11** | **55.64** | `Hands-on Defensive Evaluation: grepleaks Security Architecture` | *grepleaks security review benchmark* | TypeScript, Git, Docker | Cloud Infrastructure / VPS |
-| **12** | **55.64** | `Hands-on Defensive Evaluation: NeverD Security Architecture` | *neverd security review benchmark* | C++, Git, Docker | Cloud Infrastructure / VPS |
-| **13** | **49.98** | `Blue-Team Analysis & Remediation: OpenAI Expands ChatGPT Ads with Sponsored Agents` | *how to remediate openai expands chatgpt ads wit* | Linux CLI, Python Audit Scripts | Cloud Infrastructure |
+| **8** | **55.64** | `Hands-on Defensive Evaluation: NeMo-Relay Security Architecture` | *nemo-relay security review benchmark* | Rust, Git, Docker | Cloud Infrastructure / VPS |
+| **9** | **55.64** | `Hands-on Defensive Evaluation: toolhive-registry-server Security Architecture` | *toolhive-registry-server security review benchmark* | Go, Git, Docker | Cloud Infrastructure / VPS |
+| **10** | **55.64** | `Hands-on Defensive Evaluation: ai-assessment-framework Security Architecture` | *ai-assessment-framework security review benchmark* | None, Git, Docker | Cloud Infrastructure / VPS |
+| **11** | **55.64** | `Hands-on Defensive Evaluation: provenance-template Security Architecture` | *provenance-template security review benchmark* | Python, Git, Docker | Cloud Infrastructure / VPS |
+| **12** | **55.64** | `Hands-on Defensive Evaluation: Ethos-Aegis- Security Architecture` | *ethos-aegis- security review benchmark* | Python, Git, Docker | Cloud Infrastructure / VPS |
+| **13** | **49.98** | `Blue-Team Analysis & Remediation: PS5 Linux lead quits: "a bunch of noobs using LLMs" that "they don't understand"` | *how to remediate ps5 linux lead quits: "a bunch* | Linux CLI, Python Audit Scripts | Cloud Infrastructure |
 | **14** | **49.98** | `Blue-Team Analysis & Remediation: Mistral X Mozilla: Private, Multilingual AI Browsing` | *how to remediate mistral x mozilla: private, mu* | Linux CLI, Python Audit Scripts | Cloud Infrastructure |
 | **15** | **49.98** | `Blue-Team Analysis & Remediation: ImpactGate: A merge gate that scores the structural decay AI adds` | *how to remediate impactgate: a merge gate that * | Linux CLI, Python Audit Scripts | Cloud Infrastructure |
 | **16** | **49.98** | `Blue-Team Analysis & Remediation: Show HN: How Stale Is Your AI? Release age and training cutoff for 20 models` | *how to remediate show hn: how stale is your ai?* | Linux CLI, Python Audit Scripts | Cloud Infrastructure |
@@ -89,7 +89,16 @@
 - **Scores:** Demand: 8.3 | Freshness: 8.2 | Demo: 9.5 | Affiliate: 9.0
 - **Source Reference:** Engineered Long-Tail Search Intent
 
-### 8. Hands-on Defensive Evaluation: toolhive-registry-server Security Architecture
+### 8. Hands-on Defensive Evaluation: NeMo-Relay Security Architecture
+- **Slug:** `eval-nemo-relay--multi-language-agent-runtime`
+- **Search Query:** `nemo-relay security review benchmark`
+- **Defensive Focus:** Local testbed evaluation and static analysis
+- **Demo Stack:** `Rust, Git, Docker`
+- **Affiliate Target:** Cloud Infrastructure / VPS
+- **Scores:** Demand: 8.4 | Freshness: 9.2 | Demo: 9.0 | Affiliate: 8.0
+- **Source Reference:** GitHub: https://github.com/NVIDIA/NeMo-Relay
+
+### 9. Hands-on Defensive Evaluation: toolhive-registry-server Security Architecture
 - **Slug:** `eval-toolhive-registry-server--discover--gove`
 - **Search Query:** `toolhive-registry-server security review benchmark`
 - **Defensive Focus:** Local testbed evaluation and static analysis
@@ -98,50 +107,41 @@
 - **Scores:** Demand: 8.4 | Freshness: 9.2 | Demo: 9.0 | Affiliate: 8.0
 - **Source Reference:** GitHub: https://github.com/stacklok/toolhive-registry-server
 
-### 9. Hands-on Defensive Evaluation: burp-idor Security Architecture
-- **Slug:** `eval-burp-idor--a-powerful-python-tool-for-id`
-- **Search Query:** `burp-idor security review benchmark`
+### 10. Hands-on Defensive Evaluation: ai-assessment-framework Security Architecture
+- **Slug:** `eval-ai-assessment-framework----assess-and-im`
+- **Search Query:** `ai-assessment-framework security review benchmark`
+- **Defensive Focus:** Local testbed evaluation and static analysis
+- **Demo Stack:** `None, Git, Docker`
+- **Affiliate Target:** Cloud Infrastructure / VPS
+- **Scores:** Demand: 8.4 | Freshness: 9.2 | Demo: 9.0 | Affiliate: 8.0
+- **Source Reference:** GitHub: https://github.com/theGamingPro824/ai-assessment-framework
+
+### 11. Hands-on Defensive Evaluation: provenance-template Security Architecture
+- **Slug:** `eval-provenance-template----explore-and-imple`
+- **Search Query:** `provenance-template security review benchmark`
 - **Defensive Focus:** Local testbed evaluation and static analysis
 - **Demo Stack:** `Python, Git, Docker`
 - **Affiliate Target:** Cloud Infrastructure / VPS
 - **Scores:** Demand: 8.4 | Freshness: 9.2 | Demo: 9.0 | Affiliate: 8.0
-- **Source Reference:** GitHub: https://github.com/sammakumbe/burp-idor
+- **Source Reference:** GitHub: https://github.com/alexand2570/provenance-template
 
-### 10. Hands-on Defensive Evaluation: Vexa-Agent-Control Security Architecture
-- **Slug:** `eval-vexa-agent-control--vexa-agent-control-i`
-- **Search Query:** `vexa-agent-control security review benchmark`
+### 12. Hands-on Defensive Evaluation: Ethos-Aegis- Security Architecture
+- **Slug:** `eval-ethos-aegis---a-living--adaptive-digital`
+- **Search Query:** `ethos-aegis- security review benchmark`
 - **Defensive Focus:** Local testbed evaluation and static analysis
-- **Demo Stack:** `Rust, Git, Docker`
+- **Demo Stack:** `Python, Git, Docker`
 - **Affiliate Target:** Cloud Infrastructure / VPS
 - **Scores:** Demand: 8.4 | Freshness: 9.2 | Demo: 9.0 | Affiliate: 8.0
-- **Source Reference:** GitHub: https://github.com/noviqtechnologies/Vexa-Agent-Control
+- **Source Reference:** GitHub: https://github.com/DeontewattsV1/Ethos-Aegis-
 
-### 11. Hands-on Defensive Evaluation: grepleaks Security Architecture
-- **Slug:** `eval-grepleaks--grepleaks---your-ai-pentest-e`
-- **Search Query:** `grepleaks security review benchmark`
-- **Defensive Focus:** Local testbed evaluation and static analysis
-- **Demo Stack:** `TypeScript, Git, Docker`
-- **Affiliate Target:** Cloud Infrastructure / VPS
-- **Scores:** Demand: 8.4 | Freshness: 9.2 | Demo: 9.0 | Affiliate: 8.0
-- **Source Reference:** GitHub: https://github.com/grepleaks/grepleaks
-
-### 12. Hands-on Defensive Evaluation: NeverD Security Architecture
-- **Slug:** `eval-neverd--the-ai-friendly-binary-analysis`
-- **Search Query:** `neverd security review benchmark`
-- **Defensive Focus:** Local testbed evaluation and static analysis
-- **Demo Stack:** `C++, Git, Docker`
-- **Affiliate Target:** Cloud Infrastructure / VPS
-- **Scores:** Demand: 8.4 | Freshness: 9.2 | Demo: 9.0 | Affiliate: 8.0
-- **Source Reference:** GitHub: https://github.com/NeverSight/NeverD
-
-### 13. Blue-Team Analysis & Remediation: OpenAI Expands ChatGPT Ads with Sponsored Agents
-- **Slug:** `remediation-openai-expands-chatgpt-ads-with-sponsore`
-- **Search Query:** `how to remediate openai expands chatgpt ads wit`
+### 13. Blue-Team Analysis & Remediation: PS5 Linux lead quits: "a bunch of noobs using LLMs" that "they don't understand"
+- **Slug:** `remediation-ps5-linux-lead-quits---a-bunch-of-noobs`
+- **Search Query:** `how to remediate ps5 linux lead quits: "a bunch`
 - **Defensive Focus:** Threat hunting and defensive architecture patch
 - **Demo Stack:** `Linux CLI, Python Audit Scripts`
 - **Affiliate Target:** Cloud Infrastructure
 - **Scores:** Demand: 8.0 | Freshness: 9.8 | Demo: 8.5 | Affiliate: 7.5
-- **Source Reference:** HN: https://openai.com/index/reimagining-advertising-with-ai/
+- **Source Reference:** HN: https://frvr.com/blog/news/ps5-linux-lead-quits-as-open-source-projects-have-become-a-bunch-of-noobs-using-llms-that-they-dont-even-understand/
 
 ### 14. Blue-Team Analysis & Remediation: Mistral X Mozilla: Private, Multilingual AI Browsing
 - **Slug:** `remediation-mistral-x-mozilla--private--multilingual`
