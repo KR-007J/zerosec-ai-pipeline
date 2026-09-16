@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-ZeroSec AI Video Assembly Engine - Phase 4
-Assembles screen recording, voiceover, background music, burned subtitles,
-and animated lower-thirds into a 1080p master video + 3 vertical Shorts.
+ZeroSec AI Video Assembly Engine - Phase 4 (Local CPU Path)
+Assembles screen recording, neural voiceover, background ambient music,
+Whisper-extracted burned subtitles, and animated lower-thirds into a 1080p master video
+plus 3 vertical Shorts (1080x1920).
 """
 
 import os
@@ -24,7 +25,45 @@ def load_brand():
         "subtitles": {"fontsize": 22, "margin_v": 45}
     }
 
-def generate_ass_subtitles(dialogue_chunks, output_ass_path):
+def format_ass_time(seconds):
+    h = int(seconds // 3600)
+    m = int((seconds % 3600) // 60)
+    s = int(seconds % 60)
+    cs = int((seconds - int(seconds)) * 100)
+    return f"{h}:{m:02d}:{s:02d}.{cs:02d}"
+
+def transcribe_audio_whisper(input_vo, output_json, output_ass):
+    """
+    Transcribes the synthesized voiceover using faster-whisper on CPU (int8).
+    Extracts word-level timestamps, generates transcription.json,
+    and builds high-contrast styled ASS subtitles matching ZeroSec AI brand guidelines.
+    """
+    print(f"[INFO] Transcribing audio with faster-whisper (CPU int8): {input_vo}...")
+    from faster_whisper import WhisperModel
+    model = WhisperModel("base.en", device="cpu", compute_type="int8")
+    segments, info = model.transcribe(input_vo, word_timestamps=True)
+
+    words_data = []
+    dialogue_events = []
+
+    for seg in segments:
+        text = seg.text.strip()
+        if not text:
+            continue
+        dialogue_events.append({"start": seg.start, "end": seg.end, "text": text})
+        if seg.words:
+            for w in seg.words:
+                words_data.append({"word": w.word, "start": w.start, "end": w.end, "prob": w.probability})
+
+    # Save transcription JSON
+    with open(output_json, "w", encoding="utf-8") as f:
+        json.dump({
+            "info": {"language": info.language, "duration": info.duration},
+            "words": words_data,
+            "segments": dialogue_events
+        }, f, indent=2)
+
+    # Build ASS subtitles
     brand = load_brand()
     sub_cfg = brand.get("subtitles", {})
     fontsize = sub_cfg.get("fontsize", 22)
@@ -46,26 +85,20 @@ Style: Default,DejaVu Sans,{fontsize},&H00FFFFFF,&H0000FF9D,&H00000000,&H8000000
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     events = []
-    for chunk in dialogue_chunks:
+    for chunk in dialogue_events:
         start_str = format_ass_time(chunk["start"])
         end_str = format_ass_time(chunk["end"])
         text = chunk["text"].replace("\n", "\\N")
         events.append(f"Dialogue: 0,{start_str},{end_str},Default,,0,0,0,,{text}")
 
-    with open(output_ass_path, "w", encoding="utf-8") as f:
+    with open(output_ass, "w", encoding="utf-8") as f:
         f.write(header + "\n".join(events) + "\n")
-    print(f"[SUCCESS] Subtitles generated -> {output_ass_path}")
-    return output_ass_path
 
-def format_ass_time(seconds):
-    h = int(seconds // 3600)
-    m = int((seconds % 3600) // 60)
-    s = int(seconds % 60)
-    cs = int((seconds - int(seconds)) * 100)
-    return f"{h}:{m:02d}:{s:02d}.{cs:02d}"
+    print(f"[SUCCESS] Subtitles generated ({len(dialogue_events)} segments, {info.duration:.1f}s) -> {output_ass}")
+    return dialogue_events, info.duration
 
-def assemble_master(input_video, input_vo, bg_music, ass_subs, output_master, duration_sec=24):
-    print(f"[INFO] Assembling 1080p master video ({duration_sec}s)...")
+def assemble_master(input_video, input_vo, bg_music, ass_subs, output_master, duration_sec):
+    print(f"[INFO] Assembling 1080p master video ({duration_sec:.1f}s)...")
     escaped_ass = ass_subs.replace(":", "\\:").replace("'", "\\'")
 
     # Dynamically verify if ass or subtitles filter is present in the environment
@@ -92,9 +125,9 @@ def assemble_master(input_video, input_vo, bg_music, ass_subs, output_master, du
 
     cmd = [
         "ffmpeg", "-y",
-        "-i", input_video,
+        "-stream_loop", "-1", "-i", input_video,
         "-i", input_vo,
-        "-i", bg_music,
+        "-stream_loop", "-1", "-i", bg_music,
         "-filter_complex", f"[0:v]{vf}[vout];{af}",
         "-map", "[vout]",
         "-map", "[aout]",
@@ -103,7 +136,7 @@ def assemble_master(input_video, input_vo, bg_music, ass_subs, output_master, du
         "-pix_fmt", "yuv420p",
         "-c:a", "aac",
         "-b:a", "192k",
-        "-t", str(duration_sec),
+        "-t", f"{duration_sec:.2f}",
         output_master
     ]
 
@@ -111,14 +144,20 @@ def assemble_master(input_video, input_vo, bg_music, ass_subs, output_master, du
     print(f"[SUCCESS] Master video created -> {output_master}")
     return output_master
 
-def export_shorts(input_master, output_dir):
+def export_shorts(input_master, output_dir, total_duration):
     os.makedirs(output_dir, exist_ok=True)
     print("[INFO] Exporting 3 high-retention vertical Shorts (1080x1920)...")
 
+    # Adapt short duration to total video duration (max 12s, min 5s)
+    dur = min(12.0, max(5.0, total_duration / 4.0))
+    s1_start = 0.0
+    s2_start = min(max(s1_start + dur, total_duration * 0.35), max(0.0, total_duration - dur))
+    s3_start = min(max(s2_start + dur, total_duration * 0.70), max(0.0, total_duration - dur))
+
     segments = [
-        {"name": "short_1_exploit_threat.mp4", "start": 0, "duration": 8, "hook": "Can you hijack LangChain in 10 lines?"},
-        {"name": "short_2_colang_rails.mp4", "start": 8, "duration": 8, "hook": "How NeMo Guardrails Works"},
-        {"name": "short_3_blocked_defense.mp4", "start": 16, "duration": 8, "hook": "Prompt Injection BLOCKED at runtime"}
+        {"name": "short_1_exploit_threat.mp4", "start": s1_start, "duration": dur, "hook": "Can you hijack LangChain in 10 lines?"},
+        {"name": "short_2_colang_rails.mp4", "start": s2_start, "duration": dur, "hook": "How NeMo Guardrails Works"},
+        {"name": "short_3_blocked_defense.mp4", "start": s3_start, "duration": dur, "hook": "Prompt Injection BLOCKED at runtime"}
     ]
 
     exported = []
@@ -134,9 +173,9 @@ def export_shorts(input_master, output_dir):
         )
         cmd = [
             "ffmpeg", "-y",
-            "-ss", str(s["start"]),
+            "-ss", f"{s['start']:.2f}",
             "-i", input_master,
-            "-t", str(s["duration"]),
+            "-t", f"{s['duration']:.2f}",
             "-filter_complex", filter_complex,
             "-c:v", "libx264",
             "-preset", "ultrafast",
@@ -158,6 +197,7 @@ def run_assembly(slug="prevent-prompt-injection-langchain-nemo"):
     output_master = os.path.join(build_dir, "master.mp4")
     shorts_dir = os.path.join(build_dir, "shorts")
     ass_subs = os.path.join(build_dir, "subtitles.ass")
+    json_transcription = os.path.join(build_dir, "transcription.json")
 
     # If input.mp4 does not exist in build dir (e.g. clean CI runner), generate placeholder recording
     if not os.path.exists(input_video):
@@ -166,18 +206,19 @@ def run_assembly(slug="prevent-prompt-injection-langchain-nemo"):
         gen_script = os.path.join(scripts_dir, "generate_placeholder_recording.py")
         subprocess.run([sys.executable, gen_script], check=True)
 
-    dialogue_chunks = [
-        {"start": 0.5, "end": 5.0, "text": "An LLM agent with direct tool access is a security vulnerability waiting to happen."},
-        {"start": 5.5, "end": 11.0, "text": "If you connect LangChain to a shell without deterministic guardrails, attackers can bypass your prompts."},
-        {"start": 11.5, "end": 17.0, "text": "Today, we configure NVIDIA NeMo Guardrails to stop jailbreaks at the runtime layer."},
-        {"start": 17.5, "end": 23.5, "text": "When we inject the malicious payload, the Colang input rail intercepts and blocks the execution."}
-    ]
+    if not os.path.exists(input_vo):
+        raise FileNotFoundError(f"[ERROR] Voiceover file not found: {input_vo}. Run pipeline/voice.py first.")
 
-    generate_ass_subtitles(dialogue_chunks, ass_subs)
-    assemble_master(input_video, input_vo, BG_MUSIC_DEFAULT, ass_subs, output_master, duration_sec=24)
-    shorts = export_shorts(output_master, shorts_dir)
+    # 1. Transcribe synthesized audio with faster-whisper on CPU to produce accurate timestamps and dialogue
+    dialogue_events, duration_sec = transcribe_audio_whisper(input_vo, json_transcription, ass_subs)
 
-    print(f"[SUCCESS] Assembly complete! Master: {output_master}")
+    # 2. Assemble 1080p master video matching exact voice duration
+    assemble_master(input_video, input_vo, BG_MUSIC_DEFAULT, ass_subs, output_master, duration_sec=duration_sec)
+
+    # 3. Export 3 vertical Shorts based on dynamic timestamps
+    shorts = export_shorts(output_master, shorts_dir, total_duration=duration_sec)
+
+    print(f"[SUCCESS] Local CPU Assembly complete! Master: {output_master} (Duration: {duration_sec:.1f}s)")
     return output_master, shorts
 
 if __name__ == "__main__":

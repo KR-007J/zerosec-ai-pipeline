@@ -23,10 +23,12 @@ package_output/
 !build/**/metadata.txt
 !build/**/APPROVED
 !build/**/thumb_*.png
+!build/**/subtitles.ass
+!build/**/transcription.json
 
 # Kaggle credentials
 .kaggle/
 kaggle.json
 
-# Piper ONNX model binaries (auto-downloaded on first run)
-assets/models/**/*.onnx
+# Downloaded model weights & Piper ONNX binaries
+assets/models/

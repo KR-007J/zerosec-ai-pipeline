@@ -3,18 +3,38 @@ Title: ZeroSec AI Subtitles
 ScriptType: v4.00+
 WrapStyle: 0
 ScaledBorderAndShadow: yes
-YCbCr Matrix: TV.601
 PlayResX: 1920
 PlayResY: 1080
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Default,DejaVu Sans,22,&H00FFFFFF,&H0000FF9D,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,3,2,1,2,60,60,45,1
-Style: Accent,DejaVu Sans,24,&H009DFF00,&H00000000,&H00000000,&H90000000,-1,0,0,0,100,100,0,0,3,2,1,2,60,60,45,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 0,0:00:00.50,0:00:05.00,Default,,0,0,0,,An LLM agent with direct tool access is a security vulnerability waiting to happen.
-Dialogue: 0,0:00:05.50,0:00:11.00,Default,,0,0,0,,If you connect LangChain to a shell without deterministic guardrails, attackers can bypass your prompts.
-Dialogue: 0,0:00:11.50,0:00:17.00,Default,,0,0,0,,Today, we configure NVIDIA NeMo Guardrails to stop jailbreaks at the runtime layer.
-Dialogue: 0,0:00:17.50,0:00:23.50,Default,,0,0,0,,When we inject the malicious payload, the Colang input rail intercepts and blocks the execution.
+Dialogue: 0,0:00:00.00,0:00:04.66,Default,,0,0,0,,An LLM agent with direct tool execution is a critical vulnerability waiting to happen.
+Dialogue: 0,0:00:05.05,0:00:08.77,Default,,0,0,0,,If you connect line chain to a shell or database without a deterministic guardrail,
+Dialogue: 0,0:00:09.17,0:00:11.56,Default,,0,0,0,,an attacker can bypass your system prompt in seconds.
+Dialogue: 0,0:00:12.14,0:00:17.51,Default,,0,0,0,,Today, we are setting up Nemo guardrails to stop jailbreaks and prompt injection at the runtime layer.
+Dialogue: 0,0:00:18.01,0:00:21.05,Default,,0,0,0,,Prompt injection isn't a bug you can fix with a longer system prompt.
+Dialogue: 0,0:00:21.60,0:00:26.80,Default,,0,0,0,,Attackers use payload splitting, delimiter injection, and role-playing attacks to override developer instructions.
+Dialogue: 0,0:00:26.80,0:00:34.75,Default,,0,0,0,,Traditional Ridge X and keyword blocklists fail because natural language is infinitely combinatorial, Nemo guardrails.
+Dialogue: 0,0:00:35.07,0:00:40.88,Default,,0,0,0,,Developed by NVIDIA solves this by intercepting user inputs before they reach the model checking responses
+Dialogue: 0,0:00:40.88,0:00:46.35,Default,,0,0,0,,against programmable calling execution flows, setting up the isolated sandbox and dependencies.
+Dialogue: 0,0:00:46.93,0:00:49.57,Default,,0,0,0,,We begin by spinning up an isolated virtual environment.
+Dialogue: 0,0:00:49.57,0:00:58.85,Default,,0,0,0,,Always test LLM tools inside an unprivileged sandbox or a disposable cloud VPSO test scripts cannot touch sensitive environment variables.
+Dialogue: 0,0:00:59.39,0:01:03.00,Default,,0,0,0,,Defining calling security rails for input and output guardrails.
+Dialogue: 0,0:01:03.20,0:01:06.12,Default,,0,0,0,,In Nemo guardrails, policies are declared in calling.
+Dialogue: 0,0:01:06.73,0:01:12.76,Default,,0,0,0,,We define an input rail that detects gelbrick attempts dot routes the conversation to a safe refusal state
+Dialogue: 0,0:01:12.76,0:01:18.26,Default,,0,0,0,,before any line chain tool or downstream API receives the malicious token payload, live test,
+Dialogue: 0,0:01:18.26,0:01:25.45,Default,,0,0,0,,injecting exploit payloads via guardrail defense when we execute our test harness against the naked line chain agent.
+Dialogue: 0,0:01:26.01,0:01:34.37,Default,,0,0,0,,The injection succeeds, but when routed through the Nemo LLM rails wrapper, the guardrail triggers an instant block with zero tokens leaked to the underlying model,
+Dialogue: 0,0:01:34.68,0:01:45.71,Default,,0,0,0,,while Nemo guardrails significantly hardens your application it adds between 200 to 450 milliseconds of latency per request depending on whether you use self-hosted embeddings
+Dialogue: 0,0:01:45.71,0:01:48.12,Default,,0,0,0,,or PI based classification models.
+Dialogue: 0,0:01:48.59,0:01:54.87,Default,,0,0,0,,Additionally, over restrictive semantic rules can introduce false positive refusals on benign developer questions
+Dialogue: 0,0:01:54.87,0:02:00.40,Default,,0,0,0,,for any production agent that executes SQL queries, file I slash O, or web requests,
+Dialogue: 0,0:02:00.85,0:02:04.15,Default,,0,0,0,,relying solely on prompt engineering is irresponsible engineering.
+Dialogue: 0,0:02:04.62,0:02:10.65,Default,,0,0,0,,Nemo guardrails provides a defensible programmable boundary that belongs in your production security stack.
+Dialogue: 0,0:02:10.65,0:02:15.74,Default,,0,0,0,,All configuration files and test scripts are linked in the GitHub repository in the description.
+Dialogue: 0,0:02:16.30,0:02:23.81,Default,,0,0,0,,If you are deploying this to the cloud, use the isolated VPS link below for $200 in free credits to test without risking your infrastructure.
+Dialogue: 0,0:02:24.59,0:02:28.13,Default,,0,0,0,,Let me know in the comments what guardrails are you currently running in production?

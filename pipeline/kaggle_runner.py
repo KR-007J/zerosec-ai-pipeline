@@ -155,11 +155,24 @@ def dispatch_kaggle_gpu_job(username, slug):
 def run_assembly_bridge(slug="prevent-prompt-injection-langchain-nemo"):
     username = setup_kaggle_credentials()
     if username:
+        print("\n" + "=" * 60)
+        print("[PIPELINE PATH: KAGGLE GPU OFF-LOAD ACTIVE]")
+        print(f"[INFO] Authenticated as Kaggle user: {username}")
+        print("==================================================\n")
         try:
             dispatch_kaggle_gpu_job(username, slug)
             return
         except Exception as e:
-            print(f"[WARN] Kaggle GPU job failed or was skipped ({e}). Falling back to runner assembly...", file=sys.stderr)
+            print("\n" + "=" * 60, file=sys.stderr)
+            print("[PIPELINE PATH: FALLING BACK TO LOCAL CPU RUNNER]", file=sys.stderr)
+            print(f"[WARN] Kaggle GPU job failed ({e}). Falling back to runner assembly...", file=sys.stderr)
+            print("==================================================\n", file=sys.stderr)
+    else:
+        print("\n" + "=" * 60)
+        print("[PIPELINE PATH: LOCAL CPU FALLBACK ACTIVE]")
+        print("[INFO] KAGGLE_USERNAME and/or KAGGLE_KEY secrets not detected in environment.")
+        print("[INFO] Executing Phase 4 assembly on runner CPU with faster-whisper (int8)...")
+        print("==================================================\n")
 
     print("[INFO] Executing runner assembly engine (pipeline/edit.py)...")
     sys.path.insert(0, os.path.dirname(__file__))

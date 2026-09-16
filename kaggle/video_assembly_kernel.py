@@ -106,9 +106,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         f.write(ass_header + "\n".join(lines) + "\n")
 
     print(f"[SUCCESS] Transcribed {len(dialogue_events)} dialogue segments -> {output_ass}")
-    return output_ass
+    return output_ass, info.duration
 
-def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, working_dir):
+def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, working_dir, duration_sec=None):
     master_path = os.path.join(working_dir, "master.mp4")
     shorts_dir = os.path.join(working_dir, "shorts")
     os.makedirs(shorts_dir, exist_ok=True)
@@ -139,9 +139,9 @@ def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, worki
 
     cmd_master = [
         FFMPEG_BIN, "-y",
-        "-i", input_video,
+        "-stream_loop", "-1", "-i", input_video,
         "-i", input_audio,
-        "-i", bg_music,
+        "-stream_loop", "-1", "-i", bg_music,
         "-filter_complex", f"[0:v]{vf}[vout];{af}",
         "-map", "[vout]",
         "-map", "[aout]",
@@ -149,17 +149,26 @@ def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, worki
         "-preset", "fast",
         "-pix_fmt", "yuv420p",
         "-c:a", "aac",
-        "-b:a", "192k",
-        master_path
+        "-b:a", "192k"
     ]
+    if duration_sec:
+        cmd_master.extend(["-t", f"{duration_sec:.2f}"])
+    cmd_master.append(master_path)
+
     subprocess.run(cmd_master, check=True)
     print(f"[SUCCESS] Master video rendered -> {master_path}")
 
-    # Export 3 Vertical Shorts (1080x1920)
+    # Export 3 Vertical Shorts (1080x1920) with dynamic duration scaling
+    total_dur = duration_sec if duration_sec else 24.0
+    dur = min(12.0, max(5.0, total_dur / 4.0))
+    s1_start = 0.0
+    s2_start = min(max(s1_start + dur, total_dur * 0.35), max(0.0, total_dur - dur))
+    s3_start = min(max(s2_start + dur, total_dur * 0.70), max(0.0, total_dur - dur))
+
     shorts_specs = [
-        ("short_1_exploit_threat.mp4", 0, 8, "Can you hijack LangChain in 10 lines?"),
-        ("short_2_colang_rails.mp4", 8, 8, "How NeMo Guardrails Works"),
-        ("short_3_blocked_defense.mp4", 16, 8, "Prompt Injection BLOCKED at runtime")
+        ("short_1_exploit_threat.mp4", s1_start, dur, "Can you hijack LangChain in 10 lines?"),
+        ("short_2_colang_rails.mp4", s2_start, dur, "How NeMo Guardrails Works"),
+        ("short_3_blocked_defense.mp4", s3_start, dur, "Prompt Injection BLOCKED at runtime")
     ]
 
     for fname, start_sec, dur_sec, hook in shorts_specs:
@@ -174,9 +183,9 @@ def render_master_and_shorts(input_video, input_audio, bg_music, ass_path, worki
         )
         cmd_short = [
             FFMPEG_BIN, "-y",
-            "-ss", str(start_sec),
+            "-ss", f"{start_sec:.2f}",
             "-i", master_path,
-            "-t", str(dur_sec),
+            "-t", f"{dur_sec:.2f}",
             "-filter_complex", filter_short,
             "-c:v", "libx264",
             "-preset", "fast",
@@ -218,8 +227,8 @@ def main():
     output_json = os.path.join(working_dir, "transcription.json")
     output_ass = os.path.join(working_dir, "subtitles.ass")
 
-    transcribe_audio_whisper(input_audio, output_json, output_ass)
-    render_master_and_shorts(input_video, input_audio, bg_music, output_ass, working_dir)
+    output_ass, duration_sec = transcribe_audio_whisper(input_audio, output_json, output_ass)
+    render_master_and_shorts(input_video, input_audio, bg_music, output_ass, working_dir, duration_sec=duration_sec)
 
     print("=== ZeroSec AI Kaggle GPU Worker Completed Successfully ===")
 
