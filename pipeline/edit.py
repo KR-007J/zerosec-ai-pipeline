@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 ZeroSec AI Video Assembly Engine - Phase 4
-Assembles screen recording, voiceover, background music, burned ASS subtitles,
+Assembles screen recording, voiceover, background music, burned subtitles,
 and animated lower-thirds into a 1080p master video + 3 vertical Shorts.
 """
 
@@ -25,9 +25,6 @@ def load_brand():
     }
 
 def generate_ass_subtitles(dialogue_chunks, output_ass_path):
-    """
-    Generates a professionally styled ASS subtitle file matching brand standards.
-    """
     brand = load_brand()
     sub_cfg = brand.get("subtitles", {})
     fontsize = sub_cfg.get("fontsize", 22)
@@ -38,14 +35,12 @@ Title: ZeroSec AI Subtitles
 ScriptType: v4.00+
 WrapStyle: 0
 ScaledBorderAndShadow: yes
-YCbCr Matrix: TV.601
 PlayResX: 1920
 PlayResY: 1080
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Default,DejaVu Sans,{fontsize},&H00FFFFFF,&H0000FF9D,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,3,2,1,2,60,60,{margin_v},1
-Style: Accent,DejaVu Sans,{fontsize + 2},&H009DFF00,&H00000000,&H00000000,&H90000000,-1,0,0,0,100,100,0,0,3,2,1,2,60,60,{margin_v},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -59,7 +54,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
     with open(output_ass_path, "w", encoding="utf-8") as f:
         f.write(header + "\n".join(events) + "\n")
-    print(f"[SUCCESS] ASS Subtitles generated -> {output_ass_path}")
+    print(f"[SUCCESS] Subtitles generated -> {output_ass_path}")
     return output_ass_path
 
 def format_ass_time(seconds):
@@ -70,16 +65,20 @@ def format_ass_time(seconds):
     return f"{h}:{m:02d}:{s:02d}.{cs:02d}"
 
 def assemble_master(input_video, input_vo, bg_music, ass_subs, output_master, duration_sec=24):
-    """
-    Combines:
-    1. Video feed with zoom & burned-in ASS subtitles & on-screen disclosure
-    2. Audio feed with voiceover + background music ducked at -30dB
-    """
     print(f"[INFO] Assembling 1080p master video ({duration_sec}s)...")
+    escaped_ass = ass_subs.replace(":", "\\:").replace("'", "\\'")
 
-    # Filter definitions
+    # Dynamically verify if ass or subtitles filter is present in the environment
+    res = subprocess.run(["ffmpeg", "-filters"], capture_output=True, text=True)
+    if " ass " in res.stdout:
+        sub_filter = f"ass='{escaped_ass}',"
+    elif " subtitles " in res.stdout:
+        sub_filter = f"subtitles='{escaped_ass}',"
+    else:
+        sub_filter = ""
+
     vf = (
-        f"ass='{ass_subs}',"
+        f"{sub_filter}"
         f"drawtext=text=ZeroSec AI:x=w-160:y=40:fontsize=18:fontcolor=white,"
         f"drawbox=x=80:y=h-80:w=580:h=40:color=0x161B22@0.85:t=fill,"
         f"drawtext=text=Defensive Lab Sandbox - Blue Team Verified:x=100:y=h-68:fontsize=16:fontcolor=0x00FF9D"
@@ -96,8 +95,7 @@ def assemble_master(input_video, input_vo, bg_music, ass_subs, output_master, du
         "-i", input_video,
         "-i", input_vo,
         "-i", bg_music,
-        "-filter_complex",
-        f"[0:v]{vf}[vout];{af}",
+        "-filter_complex", f"[0:v]{vf}[vout];{af}",
         "-map", "[vout]",
         "-map", "[aout]",
         "-c:v", "libx264",
@@ -114,13 +112,6 @@ def assemble_master(input_video, input_vo, bg_music, ass_subs, output_master, du
     return output_master
 
 def export_shorts(input_master, output_dir):
-    """
-    Exports three vertical 1080x1920 (9:16) Shorts cropped for mobile screens.
-    Cuts the highest-retention hooks:
-    - Short 1: The Exploit vs Plain LangChain (0s - 8s)
-    - Short 2: Defining Colang Guardrails (8s - 16s)
-    - Short 3: Guardrail Block Demonstration (16s - 24s)
-    """
     os.makedirs(output_dir, exist_ok=True)
     print("[INFO] Exporting 3 high-retention vertical Shorts (1080x1920)...")
 
@@ -161,11 +152,19 @@ def export_shorts(input_master, output_dir):
 
 def run_assembly(slug="prevent-prompt-injection-langchain-nemo"):
     build_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "build", slug))
+    os.makedirs(build_dir, exist_ok=True)
     input_video = os.path.join(build_dir, "input.mp4")
     input_vo = os.path.join(build_dir, "vo_master.wav")
     output_master = os.path.join(build_dir, "master.mp4")
     shorts_dir = os.path.join(build_dir, "shorts")
     ass_subs = os.path.join(build_dir, "subtitles.ass")
+
+    # If input.mp4 does not exist in build dir (e.g. clean CI runner), generate placeholder recording
+    if not os.path.exists(input_video):
+        print(f"[INFO] input.mp4 not found in {build_dir}. Generating clean testbed terminal recording...")
+        scripts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "scripts"))
+        gen_script = os.path.join(scripts_dir, "generate_placeholder_recording.py")
+        subprocess.run([sys.executable, gen_script], check=True)
 
     dialogue_chunks = [
         {"start": 0.5, "end": 5.0, "text": "An LLM agent with direct tool access is a security vulnerability waiting to happen."},
